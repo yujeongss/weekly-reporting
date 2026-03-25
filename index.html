@@ -406,22 +406,6 @@
       flex-shrink: 0;
     }
     .chat-panel-title { font-size: 14px; font-weight: 600; color: var(--text); }
-    .chat-api-bar {
-      padding: 8px 12px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 6px; background: var(--bg); flex-shrink: 0;
-    }
-    .chat-api-input {
-      flex: 1; font-size: 11px; padding: 5px 8px; border-radius: 6px;
-      border: 1px solid var(--border); background: var(--card-bg); color: var(--text);
-      font-family: monospace; outline: none;
-    }
-    .chat-api-input:focus { border-color: var(--accent); }
-    .chat-api-save {
-      font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 6px;
-      border: none; background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap;
-    }
-    .chat-api-status { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
-    .chat-api-status.ok { color: var(--green); }
     .chat-close-btn {
       background: none; border: none; cursor: pointer;
       font-size: 18px; color: var(--text-muted); line-height: 1;
@@ -1915,13 +1899,6 @@
   <div class="chat-panel-header">
     <span class="chat-panel-title">🤖 AI 어시스턴트</span>
     <button class="chat-close-btn" onclick="closeChat()">×</button>
-  </div>
-  <div class="chat-api-bar">
-    <input id="chatApiInput" class="chat-api-input" type="password"
-      placeholder="Anthropic API 키 (sk-ant-...)"
-      onkeydown="if(event.key==='Enter') saveChatApiKey()" />
-    <button class="chat-api-save" onclick="saveChatApiKey()">저장</button>
-    <span id="chatApiStatus" class="chat-api-status"></span>
   </div>
   <div id="chatMessages"></div>
   <div id="chatInputArea" class="chat-input-area">
@@ -4289,7 +4266,6 @@ function openChat() {
   _chatOpen = true;
   document.getElementById('chatPanel').classList.add('open');
   document.getElementById('chatFab').classList.add('hidden');
-  setTimeout(loadChatApiKey, 50);
   if (!state.chatMessages) state.chatMessages = [];
   if (state.chatMessages.length === 0) {
     const memberList = state.meta.members.map(m => m.name).join(', ');
@@ -4561,28 +4537,9 @@ function getChatTools() {
   ];
 }
 
-// ── API 키 관리 ──
-const CHAT_API_KEY_STORAGE = 'weekly_chat_api_key';
-function loadChatApiKey() {
-  const stored = localStorage.getItem(CHAT_API_KEY_STORAGE);
-  const el = document.getElementById('chatApiInput');
-  const st = document.getElementById('chatApiStatus');
-  if (stored && el) { el.value = stored; }
-  if (st) { st.textContent = stored ? '✓ 저장됨' : '미설정'; st.className = 'chat-api-status' + (stored ? ' ok' : ''); }
-  return stored || window.CLAUDE_API_KEY || '';
-}
-function saveChatApiKey() {
-  const el = document.getElementById('chatApiInput');
-  const st = document.getElementById('chatApiStatus');
-  const val = (el?.value || '').trim();
-  if (!val) return;
-  localStorage.setItem(CHAT_API_KEY_STORAGE, val);
-  if (st) { st.textContent = '✓ 저장됨'; st.className = 'chat-api-status ok'; }
-}
-
 // ── 메시지 전송 ──
 async function sendChatMessage() {
-  const key = loadChatApiKey();
+  const key = window.CLAUDE_API_KEY || '';
 
   const ta = document.getElementById('chatTextarea');
   const text = ta.value.trim();
@@ -4635,12 +4592,11 @@ async function sendChatMessage() {
 
     console.log('[chat] sending', apiMessages.length, 'messages, chatMessages total:', state.chatMessages.length);
 
-    if (!key || key.startsWith('sk-ant-여기에')) {
-      _appendErrorMsg('상단 입력창에 Anthropic API 키를 입력하고 저장해 주세요.');
-      return;
-    }
-    const endpoint = 'https://api.anthropic.com/v1/messages';
-    const headers = { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true', 'content-type': 'application/json' };
+    const useProxy = !key || key.startsWith('sk-ant-여기에');
+    const endpoint = useProxy ? '/api/claude' : 'https://api.anthropic.com/v1/messages';
+    const headers = useProxy
+      ? { 'content-type': 'application/json' }
+      : { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true', 'content-type': 'application/json' };
 
     const res = await fetch(endpoint, {
       method: 'POST',
