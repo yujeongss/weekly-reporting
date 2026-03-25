@@ -1,0 +1,8 @@
+config.js
+node_modules/
+qc-screenshots/
+.claude/
+analyze_template*.js
+qc_test.js
+*.xlsx
+package-lock.json

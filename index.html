@@ -1,0 +1,5113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>전략개발팀 주간업무보고</title>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script src="config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+    /* ===== CSS VARIABLES (2026 Indigo/Slate) ===== */
+    :root {
+      --accent: #4F46E5;
+      --accent-dark: #3730A3;
+      --accent-light: #EEF2FF;
+      --accent-gradient: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      --primary: #4F46E5;
+      --primary-dark: #3730A3;
+      --primary-light: #EEF2FF;
+      --sidebar-bg: #FFFFFF;
+      --sidebar-hover: #F5F3FF;
+      --sidebar-active: #EEF2FF;
+      --sidebar-text: #1E293B;
+      --sidebar-border: #E2E8F0;
+      --bg: #F8FAFF;
+      --card-bg: #FFFFFF;
+      --border: #E2E8F0;
+      --border-light: #F1F5F9;
+      --text: #1E293B;
+      --text-muted: #94A3B8;
+      --text-secondary: #64748B;
+      --red: #EF4444;
+      --red-light: #FEF2F2;
+      --yellow: #F59E0B;
+      --yellow-light: #FFFBEB;
+      --green: #10B981;
+      --green-light: #ECFDF5;
+      --purple: #8B5CF6;
+      --purple-light: #F5F3FF;
+      --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-sm: 0 1px 3px rgba(15,23,42,0.04), 0 2px 8px rgba(15,23,42,0.04);
+      --shadow-md: 0 2px 4px rgba(15,23,42,0.04), 0 6px 20px rgba(15,23,42,0.07);
+      --shadow-lg: 0 4px 8px rgba(15,23,42,0.05), 0 16px 40px rgba(15,23,42,0.09);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(79,70,229,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(139,92,246,0.04) 0%, transparent 60%);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== SIDEBAR ===== */
+    #sidebar {
+      width: 252px;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-right: 1px solid var(--sidebar-border);
+      box-shadow: 2px 0 12px rgba(15,23,42,0.04);
+    }
+
+    .sidebar-logo {
+      padding: 18px 16px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent-gradient);
+      position: relative;
+      overflow: hidden;
+    }
+    .sidebar-logo::after {
+      content: '';
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .sidebar-logo-text { display: flex; flex-direction: column; gap: 1px; }
+    .sidebar-team-name-wrap {
+      display: flex; align-items: center; gap: 5px;
+      cursor: pointer; font-size: 14px; font-weight: 700;
+      border-radius: 4px;
+      transition: opacity 0.15s;
+    }
+    .sidebar-team-name-wrap:hover { opacity: 0.82; }
+    .sidebar-edit-icon { opacity: 0.55; flex-shrink: 0; transition: opacity 0.15s; }
+    .sidebar-team-name-wrap:hover .sidebar-edit-icon { opacity: 1; }
+    .sidebar-sub-label {
+      font-size: 10px; font-weight: 500;
+      opacity: 0.55; letter-spacing: 0.2px;
+    }
+    .sidebar-team-name-input {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 6px;
+      color: #fff; font-size: 13px; font-weight: 700;
+      font-family: inherit; padding: 3px 8px;
+      outline: none; width: 110px;
+    }
+
+    .sidebar-logo-icon {
+      width: 28px;
+      height: 28px;
+      background: rgba(255,255,255,0.22);
+      backdrop-filter: blur(4px);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .sidebar-period {
+      padding: 12px 12px 8px;
+      flex-shrink: 0;
+    }
+    .sidebar-period > label {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .period-display {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg);
+      transition: all 0.15s ease;
+    }
+    .period-display:hover { background: var(--sidebar-hover); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .period-edit-icon {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: auto;
+      transition: transform 0.15s;
+    }
+    .period-display:hover .period-edit-icon { transform: rotate(90deg); }
+    @keyframes periodApplied {
+      0%   { color: var(--green); }
+      100% { color: var(--text); }
+    }
+    .period-display.applied { animation: periodApplied 1.2s ease forwards; }
+    .period-inputs {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .period-inputs.show { display: flex; }
+    .period-inputs select,
+    .period-inputs input[type=number] {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      width: 100%;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .period-inputs select:focus,
+    .period-inputs input[type=number]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .period-apply-btn {
+      padding: 8px 10px;
+      background: var(--accent-gradient);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      letter-spacing: 0.2px;
+    }
+    .period-apply-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+
+    .sidebar-section-label {
+      padding: 14px 16px 5px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .sidebar-item {
+      padding: 6px 10px 6px 12px;
+      min-height: 36px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--sidebar-text);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      margin: 1px 8px;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .sidebar-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 4px;
+    }
+    .sidebar-item-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sidebar-done-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
+      background: var(--green);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(16,185,129,0.35);
+    }
+    .sidebar-item-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+    .sidebar-item:hover { background: var(--sidebar-hover); color: var(--accent); }
+    .sidebar-item.active {
+      background: var(--sidebar-active);
+      color: var(--accent);
+      font-weight: 700;
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+    .sidebar-item.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .member-delete-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      padding: 3px 5px;
+      opacity: 0;
+      border-radius: 6px;
+      transition: opacity 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .sidebar-item:hover .member-delete-btn { opacity: 1; }
+    .member-delete-btn:hover { background: var(--red-light); color: var(--red); opacity: 1; }
+
+    .sidebar-badge {
+      font-size: 10px;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .sidebar-spacer { flex: 1; }
+
+    .sidebar-footer {
+      padding: 12px;
+      border-top: 1px solid var(--border-light);
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+    .export-btn {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--accent-gradient);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      letter-spacing: 0.2px;
+      box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+    }
+    .export-btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(79,70,229,0.35); }
+
+    /* ===== CHAT PANEL ===== */
+    /* AI 토글 FAB */
+    @keyframes fabBounce {
+      0%, 100% { transform: translateX(0); }
+      40%       { transform: translateX(-8px); }
+      65%       { transform: translateX(-3px); }
+    }
+    #chatFab {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      margin-top: -44px;
+      width: 52px;
+      border-radius: 14px 0 0 14px;
+      background: linear-gradient(160deg, #6D28D9, #4F46E5);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 14px 0;
+      font-size: 24px;
+      box-shadow: -4px 4px 20px rgba(79,70,229,0.35), -1px 0 0 rgba(255,255,255,0.1) inset;
+      z-index: 300;
+      animation: fabBounce 2.4s ease-in-out infinite;
+      transition: opacity 0.2s, width 0.15s;
+    }
+    #chatFab .fab-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 0.5px;
+      line-height: 1;
+    }
+    #chatFab:hover {
+      animation: none;
+      width: 60px;
+      box-shadow: -6px 4px 28px rgba(79,70,229,0.5);
+    }
+    #chatFab.hidden { opacity: 0; pointer-events: none; animation: none; }
+
+    #chatPanel {
+      width: 0;
+      flex-shrink: 0;
+      overflow: hidden;
+      background: #fff;
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.22s cubic-bezier(.4,0,.2,1);
+      box-shadow: -4px 0 16px rgba(0,0,0,0.06);
+    }
+    #chatPanel.open { width: 360px; }
+
+    #chatPanel > * { min-width: 360px; }
+
+    .chat-panel-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .chat-panel-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .chat-close-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 18px; color: var(--text-muted); line-height: 1;
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .chat-close-btn:hover { background: var(--sidebar-hover); }
+
+    #chatMessages {
+      flex: 1; overflow-y: auto;
+      padding: 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .chat-msg {
+      max-width: 88%; padding: 8px 12px;
+      border-radius: 12px; font-size: 13px; line-height: 1.55;
+      word-break: break-word;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: var(--accent); color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-msg.assistant {
+      align-self: flex-start;
+      background: var(--border-light); color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-msg.error {
+      align-self: flex-start;
+      background: var(--red-light); color: var(--red);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-msg.chat-loading {
+      align-self: flex-start;
+      background: var(--border-light); color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .chat-tool-card {
+      align-self: flex-start; width: 94%;
+      border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; font-size: 13px;
+      flex-shrink: 0;
+    }
+    .chat-tool-card.applied { opacity: 0.6; }
+    .chat-tool-card.cancelled { opacity: 0.4; }
+    .chat-tool-header {
+      padding: 8px 12px;
+      background: var(--yellow-light);
+      font-size: 12px; font-weight: 600; color: var(--yellow);
+      border-bottom: 1px solid var(--border);
+    }
+    .chat-tool-desc {
+      padding: 8px 12px; color: var(--text);
+      white-space: pre-wrap; line-height: 1.5; font-size: 12px;
+    }
+    .chat-tool-status {
+      padding: 8px 12px; display: block;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .chat-tool-actions {
+      padding: 8px 12px; display: flex; gap: 6px;
+      border-top: 1px solid var(--border-light);
+    }
+    .chat-tool-apply-btn {
+      padding: 5px 14px; background: var(--accent); color: #fff;
+      border: none; border-radius: 5px; font-size: 12px;
+      font-weight: 500; cursor: pointer;
+    }
+    .chat-tool-apply-btn:hover { background: var(--accent-dark); }
+    .chat-tool-cancel-btn {
+      padding: 5px 10px; background: var(--border); color: var(--text-secondary);
+      border: none; border-radius: 5px; font-size: 12px; cursor: pointer;
+    }
+    .chat-tool-cancel-btn:hover { background: var(--sidebar-active); }
+
+    .chat-input-area {
+      padding: 10px; border-top: 1px solid var(--border);
+      display: flex; gap: 6px; align-items: flex-end; flex-shrink: 0;
+    }
+    .chat-textarea {
+      flex: 1; resize: none; padding: 9px 10px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: inherit; line-height: 1.4;
+      outline: none; max-height: 120px;
+    }
+    .chat-textarea:focus { border-color: var(--accent); }
+    .chat-send-btn {
+      width: 38px;
+      align-self: stretch;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 8px;
+      cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chat-send-btn:hover { background: var(--accent-dark); }
+    .chat-send-btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+
+    /* ===== MAIN CONTENT ===== */
+    #main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 32px;
+      min-width: 0;
+    }
+
+    .member-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding: 20px 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .member-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .member-header .period-tag {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .member-status-bar {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-done-label {
+      font-size: 13px;
+      color: var(--green);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-check-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(16,185,129,0.35);
+    }
+    .content-body { }
+    .content-locked .section {
+      pointer-events: none;
+      opacity: 0.55;
+    }
+    .status-btn {
+      padding: 7px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .status-done-btn {
+      background: var(--accent-gradient);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+    }
+    .status-done-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.35); }
+    .status-edit-btn {
+      background: var(--bg);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    .status-edit-btn:hover { background: var(--border-light); border-color: var(--text-muted); }
+    .member-reset-btn {
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .member-reset-btn:hover { background: var(--red-light); color: var(--red); border-color: #FCA5A5; }
+    .team-done-count {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .team-done-count.all-done { color: var(--green); font-weight: 700; }
+
+    /* ===== SECTION ===== */
+    .section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: box-shadow 0.2s ease;
+    }
+    .section:hover { box-shadow: var(--shadow-md); }
+    .section-header {
+      padding: 14px 20px;
+      background: linear-gradient(to right, #FAFBFF, var(--card-bg));
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .add-btn {
+      height: 30px;
+      padding: 0 14px;
+      background: var(--accent-gradient);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      box-shadow: 0 2px 6px rgba(79,70,229,0.2);
+      letter-spacing: 0.2px;
+    }
+    .add-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(79,70,229,0.3); }
+
+    .empty-state {
+      padding: 36px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13.5px;
+    }
+
+    /* ===== TASK CARD ===== */
+    .task-card {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-light);
+      transition: background 0.15s ease;
+    }
+    .task-card:last-child { border-bottom: none; }
+    .task-card:hover { background: #FAFBFF; }
+
+    .task-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .task-kpi {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      outline: none;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: 5px 8px;
+      min-height: 32px;
+      line-height: 1.5;
+      width: 100%;
+      box-sizing: border-box;
+      background: transparent;
+      letter-spacing: -0.3px;
+      transition: all 0.15s ease;
+    }
+    .task-kpi:hover { border-color: var(--border); background: var(--bg); }
+    .task-kpi:focus { outline: none; border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+
+    .task-fields {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .field-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      height: 30px;
+      transition: border-color 0.15s;
+    }
+    .field-group:focus-within { border-color: var(--accent); background: var(--accent-light); }
+    .field-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    .field-select,
+    .field-input {
+      height: 22px;
+      padding: 0 4px;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      background: transparent;
+      color: var(--text);
+      outline: none;
+      font-family: inherit;
+    }
+    .field-input[type=number] { width: 52px; text-align: center; }
+    .field-input[type=date] { min-width: 120px; }
+
+    .task-meta-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .task-meta-header .task-kpi { flex: 1; }
+
+    .task-remove-btn {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      height: 28px;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.15s, background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .task-card:hover .task-remove-btn,
+    .deploy-card:hover .task-remove-btn { opacity: 1; }
+    .task-remove-btn:hover { background: var(--red-light); color: var(--red); border-color: #FCA5A5; }
+
+    .task-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .activity-col {
+      min-width: 0;
+    }
+
+    .activity-col h4 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text-secondary);
+      display: inline-block;
+    }
+    .activity-col h4.current { background: var(--accent-light); color: var(--accent); }
+    .activity-col h4.next { background: var(--purple-light); color: var(--purple); }
+
+    .activity-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 6px;
+    }
+    .activity-main-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .detail-items {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      margin-left: 20px;
+      margin-top: 2px;
+    }
+    .detail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .detail-text {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      border-radius: 3px;
+      padding: 2px 4px;
+      min-height: 20px;
+      line-height: 1.4;
+      background: transparent;
+      cursor: text;
+    }
+    .detail-prefix { color: var(--text-muted); font-size: 11px; flex-shrink: 0; padding-top: 3px; }
+    .detail-text:hover { border-color: var(--border); background: var(--bg); }
+    .detail-text:focus { outline: none; border-color: var(--accent); background: var(--accent-light); }
+    .mini-add-detail-btn {
+      height: 24px;
+      padding: 0 9px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .mini-add-detail-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+
+    .progress-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0 6px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .progress-input-wrap:focus-within { border-color: var(--accent); }
+    .progress-wrap-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    .progress-input-wrap .progress-input {
+      border: none;
+      background: transparent;
+      padding: 0;
+      width: 42px;
+      height: 20px;
+    }
+    .progress-input-wrap .progress-input:focus { border: none; }
+    .activity-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: 5px 8px;
+      min-height: 32px;
+      line-height: 1.6;
+      background: transparent;
+      min-width: 0;
+      transition: all 0.15s ease;
+    }
+    .activity-text:hover { border-color: var(--border); background: var(--bg); }
+    .activity-text:focus { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+
+    .progress-input {
+      width: 52px;
+      height: 26px;
+      padding: 2px 4px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+      outline: none;
+      flex-shrink: 0;
+      background: var(--bg);
+      font-family: inherit;
+    }
+    .progress-input:focus { border-color: var(--accent); }
+
+    .mini-remove-btn {
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.12s, background 0.12s;
+    }
+    .activity-item:hover .mini-remove-btn,
+    .detail-item:hover .mini-remove-btn,
+    .op-item:hover .mini-remove-btn,
+    .issue-item:hover .mini-remove-btn,
+    .redmine-item:hover .mini-remove-btn { opacity: 1; }
+    .mini-remove-btn:hover { background: var(--red-light); color: var(--red); }
+
+    .add-item-btn {
+      width: 100%;
+      padding: 6px 10px;
+      background: none;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      min-height: 30px;
+      font-family: inherit;
+      transition: all 0.15s ease;
+      text-align: left;
+      font-weight: 500;
+    }
+    .add-item-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); border-style: solid; }
+
+    /* Issues */
+    .task-issues {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      grid-column: 1 / -1;
+    }
+    .issues-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--red);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 8px;
+    }
+    .issue-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .issue-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 3px 6px;
+      min-height: 26px;
+      line-height: 1.5;
+      background: transparent;
+    }
+    .issue-text:hover { border-color: #fca5a5; background: var(--red-light); }
+    .issue-text:focus { border-color: var(--red); background: var(--red-light); }
+
+    /* ===== OPERATIONS SECTION ===== */
+    .op-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      min-height: 44px;
+      border-bottom: 1px solid var(--border-light);
+      transition: background 0.1s;
+    }
+    .op-item:last-child { border-bottom: none; }
+    .op-item:hover { background: #FAFBFF; }
+
+    .week-badge {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+      letter-spacing: 0.2px;
+    }
+    .week-badge.current { background: var(--accent-light); color: var(--accent); box-shadow: 0 1px 4px rgba(79,70,229,0.15); }
+    .week-badge.next { background: var(--purple-light); color: var(--purple); box-shadow: 0 1px 4px rgba(139,92,246,0.15); }
+    .week-badge:hover { transform: scale(1.05); }
+
+    .op-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 3px 6px;
+      min-height: 28px;
+      line-height: 1.5;
+      background: transparent;
+    }
+    .op-text:hover { border-color: var(--border); background: var(--bg); }
+    .op-text:focus { border-color: var(--accent); background: var(--accent-light); }
+
+    /* ===== DEPLOYMENT SECTION ===== */
+    .deploy-card {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .deploy-card:last-child { border-bottom: none; }
+
+    .deploy-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .deploy-product-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 2px 6px;
+      min-width: 120px;
+      min-height: 28px;
+      background: transparent;
+    }
+    .deploy-product-name:hover { border-color: var(--border); background: var(--bg); }
+    .deploy-product-name:focus { border-color: var(--accent); background: var(--accent-light); }
+
+    .deploy-fields {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .deploy-field { display: flex; flex-direction: column; gap: 4px; }
+    .deploy-field .field-label { font-size: 11px; font-weight: 500; color: var(--text-secondary); }
+    .deploy-field-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .deploy-input {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      width: 100%;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+    .deploy-input:focus { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+
+    .deploy-progress-row {
+      margin-bottom: 12px;
+    }
+    .deploy-progress-text {
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 4px 8px;
+      width: 100%;
+      min-height: 28px;
+      background: transparent;
+      line-height: 1.5;
+    }
+    .deploy-progress-text:hover { border-color: var(--border); background: var(--bg); }
+    .deploy-progress-text:focus { border-color: var(--accent); background: var(--accent-light); }
+
+    .deploy-sub-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .redmine-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .redmine-text {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 3px 6px;
+      min-height: 26px;
+      background: transparent;
+    }
+    .redmine-text:hover { border-color: var(--border); background: var(--bg); }
+    .redmine-text:focus { border-color: var(--yellow); background: var(--yellow-light); }
+
+    .deploy-issues-text {
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 4px 8px;
+      width: 100%;
+      min-height: 28px;
+      background: transparent;
+    }
+    .deploy-issues-text:hover { border-color: #fca5a5; background: var(--red-light); }
+    .deploy-issues-text:focus { border-color: var(--red); background: var(--red-light); }
+
+    /* ===== CHAT PANEL ===== */
+    #chat-panel {
+      width: 260px;
+      flex-shrink: 0;
+      background: linear-gradient(160deg, #FAFBFF 0%, var(--card-bg) 100%);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .chat-icon { font-size: 40px; margin-bottom: 14px; opacity: 0.45; }
+    .chat-title { font-size: 14px; font-weight: 700; margin-bottom: 7px; color: var(--text); }
+    .chat-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .chat-phase-badge {
+      margin-top: 14px;
+      padding: 4px 12px;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid rgba(79,70,229,0.15);
+      letter-spacing: 0.3px;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* ===== NEW ITEM HIGHLIGHT ===== */
+    @keyframes newItemFlash {
+      0%   { background: #EEF2FF; box-shadow: 0 0 0 2px #A5B4FC; }
+      60%  { background: #F5F3FF; box-shadow: 0 0 0 1px #C4B5FD; }
+      100% { background: transparent; box-shadow: none; }
+    }
+    .task-card.new-item {
+      animation: newItemFlash 1.2s ease forwards;
+    }
+
+    /* ===== NEW TASK POPUP (2026 floating pill) ===== */
+    @keyframes taskPopupIn {
+      0%   { opacity: 0; transform: translateX(-50%) translateY(-28px) scale(0.92); }
+      18%  { opacity: 1; transform: translateX(-50%) translateY(4px)   scale(1.02); }
+      28%  { opacity: 1; transform: translateX(-50%) translateY(0)      scale(1);    }
+      72%  { opacity: 1; transform: translateX(-50%) translateY(0)      scale(1);    }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-16px)  scale(0.95); }
+    }
+    .task-popup {
+      position: fixed;
+      top: 76px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 32px 16px 24px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 55%, #6D28D9 100%);
+      box-shadow:
+        0 12px 40px rgba(79, 70, 229, 0.40),
+        0 4px 12px  rgba(0, 0, 0, 0.16),
+        inset 0 1px 0 rgba(255,255,255,0.18);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.1px;
+      white-space: nowrap;
+      pointer-events: none;
+      animation: taskPopupIn 3.2s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+    }
+    .task-popup-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    }
+    .task-popup-text {
+      line-height: 1.3;
+    }
+    .task-popup-sub {
+      display: block;
+      font-size: 12px;
+      font-weight: 400;
+      opacity: 0.82;
+      margin-top: 1px;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #1E293B;
+      color: #fff;
+      padding: 11px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 9999;
+      animation: toastIn 0.2s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 8px 24px rgba(15,23,42,0.2), 0 2px 8px rgba(15,23,42,0.12);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ===== CONTENTEDITABLE PLACEHOLDER ===== */
+    [contenteditable]:empty::before {
+      content: attr(placeholder);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    [contenteditable] { cursor: text; }
+
+    /* ===== TEAM VIEW ===== */
+    .team-view { padding: 28px 32px; }
+    .team-summary {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .team-summary-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px; cursor: pointer; user-select: none;
+      border-bottom: 1px solid var(--border-light);
+      transition: background 0.15s;
+    }
+    .team-summary-header:hover { background: var(--bg); }
+    .team-summary-title { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+    .team-summary-chevron { color: var(--text-muted); transition: transform 0.22s ease; flex-shrink: 0; }
+    .team-summary.collapsed .team-summary-chevron { transform: rotate(-90deg); }
+    .team-summary-body {
+      display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start;
+      padding: 22px 24px;
+      overflow: hidden;
+      transition: max-height 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.22s ease, padding 0.22s ease;
+      max-height: 400px; opacity: 1;
+    }
+    .team-summary.collapsed .team-summary-body { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
+    .team-summary.collapsed .team-summary-header { border-bottom-color: transparent; }
+    /* 즐겨찾기 */
+    .fav-btn {
+      background: none; border: none; cursor: pointer; padding: 2px 4px;
+      color: var(--text-muted); font-size: 14px; line-height: 1;
+      transition: color 0.15s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .fav-btn:hover { color: #f59e0b; transform: scale(1.2); }
+    .fav-btn.active { color: #f59e0b; }
+    .fav-cards {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+      padding: 16px 0 20px;
+    }
+    .fav-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 14px 18px;
+      box-shadow: var(--shadow-xs); position: relative;
+      border-top: 3px solid #f59e0b;
+    }
+    .fav-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 2px; }
+    .fav-card-header-left { flex: 1; min-width: 0; }
+    .fav-card-type { font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      color: #f59e0b; text-transform: uppercase; margin-bottom: 3px; }
+    .fav-card-title { font-size: 14px; font-weight: 800; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fav-card-meta { font-size: 11px; color: var(--text-muted); margin: 3px 0 8px; }
+    .fav-card-bar { display: flex; align-items: center; gap: 8px; }
+    .fav-card-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .fav-card-remove, .fav-card-toggle {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-size: 12px; padding: 3px 5px; line-height: 1;
+      border-radius: 4px; transition: background 0.12s, color 0.12s;
+    }
+    .fav-card-remove:hover { color: var(--red); background: var(--red-light); }
+    .fav-card-toggle:hover { color: var(--accent); background: rgba(79,70,229,0.08); }
+    .fav-card-detail {
+      overflow: hidden; transition: max-height 0.26s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease;
+      max-height: 0; opacity: 0;
+    }
+    .fav-card-detail.open { max-height: 600px; opacity: 1; }
+    .fav-detail-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-light); }
+    .fav-detail-label { font-size: 10px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+    .fav-detail-list { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+    .fav-detail-list li { list-style: none; padding-left: 10px; position: relative; }
+    .fav-detail-list li::before { content: '•'; position: absolute; left: 0; color: var(--text-muted); }
+    .fav-detail-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
+    .team-progress-list { display: flex; flex-direction: column; gap: 12px; }
+    .team-member-progress { display: flex; align-items: center; gap: 10px; }
+    .team-member-name { font-size: 13px; font-weight: 700; width: 56px; flex-shrink: 0; color: var(--text); }
+    .team-progress-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 10px; overflow: hidden; min-width: 80px; }
+    .team-progress-fill { height: 100%; background: var(--accent-gradient); border-radius: 10px; transition: width 0.4s cubic-bezier(.34,1.56,.64,1); }
+    .team-progress-pct { font-size: 12px; font-weight: 700; color: var(--accent); width: 36px; text-align: right; flex-shrink: 0; }
+    .team-count-cards { display: flex; flex-direction: column; gap: 8px; }
+    .team-count-card {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); min-width: 140px; gap: 16px;
+    }
+    .team-count-card.warn { border-color: #FCA5A5; background: var(--red-light); }
+    .team-count-num { font-size: 22px; font-weight: 800; color: var(--text); }
+    .team-count-card.warn .team-count-num { color: var(--red); }
+    .team-count-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    /* Card view */
+    .team-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 20px; }
+    .team-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 18px 20px; transition: all 0.18s ease;
+      box-shadow: var(--shadow-xs);
+    }
+    .team-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(79,70,229,0.12); }
+    .team-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; cursor: pointer; user-select: none; }
+    .team-card.collapsed .team-card-header { margin-bottom: 0; }
+    .team-card-body { overflow: hidden; transition: max-height 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.22s ease; max-height: 400px; opacity: 1; }
+    .team-card.collapsed .team-card-body { max-height: 0; opacity: 0; }
+    .team-card-chevron { margin-left: auto; flex-shrink: 0; color: var(--text-muted); transition: transform 0.22s ease; }
+    .team-card.collapsed .team-card-chevron { transform: rotate(-90deg); }
+    .team-card-name { font-size: 15px; font-weight: 800; color: var(--text); }
+    .team-card-division {
+      font-size: 10px; padding: 3px 8px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 20px; color: var(--text-secondary); font-weight: 600;
+    }
+    .team-card-issue-badge {
+      font-size: 11px; font-weight: 700;
+      color: var(--red); background: var(--red-light); padding: 3px 8px; border-radius: 20px;
+    }
+    .team-card-task { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border-light); gap: 8px; }
+    .team-card-task:last-child { border-bottom: none; }
+    .team-card-kpi { font-size: 13px; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .team-card-pct { font-size: 12px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .team-card-empty { font-size: 12px; color: var(--text-muted); padding: 4px 0; }
+    .team-card-footer { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-light); }
+    /* Toggle */
+    .team-view-toggle { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+    .team-toggle-btn {
+      padding: 5px 14px; font-size: 12px; font-weight: 600; border-radius: 7px;
+      border: none; background: none; cursor: pointer;
+      color: var(--text-secondary); font-family: inherit; transition: all 0.15s ease;
+    }
+    .team-toggle-btn.active { background: var(--card-bg); color: var(--accent); box-shadow: var(--shadow-xs); font-weight: 700; }
+    .team-toggle-btn:not(.active):hover { color: var(--text); }
+    /* Table view */
+    .team-table-wrap { overflow-x: auto; }
+    .team-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .team-table thead tr { background: #F8FAFF; }
+    .team-table th {
+      padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 700;
+      color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.7px;
+      border-bottom: 1px solid var(--border);
+    }
+    .team-table-row { border-bottom: 1px solid var(--border-light); }
+    .team-table-row:last-child { border-bottom: none; }
+    .team-table-row.has-issue { background: #FFFBF0; }
+    .team-td { padding: 10px 14px; vertical-align: top; color: var(--text); line-height: 1.6; white-space: pre-line; }
+    .team-td-member {
+      font-weight: 700; font-size: 13px; color: var(--text);
+      padding: 10px 14px; vertical-align: top;
+      border-right: 1px solid var(--border); white-space: nowrap; background: #F8FAFF;
+    }
+    .team-td-kpi { font-weight: 500; outline: none; min-width: 120px; }
+    .team-td-kpi:focus { background: var(--accent-light); border-radius: var(--radius-sm); }
+    .team-td-activity { min-width: 160px; color: var(--text-secondary); font-size: 12px; }
+    .team-td-pct { text-align: center; white-space: nowrap; }
+    .team-pct-input {
+      width: 56px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 13px; text-align: center; font-family: inherit; background: var(--bg); outline: none;
+      transition: all 0.15s;
+    }
+    .team-pct-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+    .team-td-issue { color: var(--red); font-size: 12px; }
+    .issue-cell { background: var(--red-light); }
+
+    /* ===== PROGRESS INDICATOR ===== */
+    .progress-bar-wrap {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .progress-bar-bg {
+      flex: 1;
+      height: 4px;
+      background: var(--border-light);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+      border-radius: 10px;
+      transition: width 0.4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .progress-pct {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 30px;
+      text-align: right;
+    }
+
+    /* ===== BUTTON FEEDBACK ===== */
+    .add-btn:active, .export-btn:active, .period-apply-btn:active {
+      transform: scale(0.96) !important;
+    }
+
+    /* ===== NEW SUB-ITEM FLASH ===== */
+    @keyframes newSubItemFlash {
+      0%   { background: var(--accent-light); box-shadow: 0 0 0 2px #A5B4FC; border-radius: var(--radius-sm); }
+      60%  { background: var(--accent-light); }
+      100% { background: transparent; box-shadow: none; }
+    }
+    .activity-item.new-sub-item,
+    .issue-item.new-sub-item,
+    .op-item.new-sub-item { animation: newSubItemFlash 1s ease forwards; }
+
+    /* ===== ADD MEMBER MODAL ===== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.4);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10000;
+      animation: toastIn 0.18s ease;
+    }
+    .modal-box {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      width: 320px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+    }
+    .modal-title {
+      font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 18px;
+    }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label {
+      font-size: 12px; color: var(--text-secondary); display: block;
+      margin-bottom: 5px; font-weight: 600; letter-spacing: 0.2px;
+    }
+    .modal-field input, .modal-field select {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 14px; color: var(--text); outline: none;
+      background: var(--bg); font-family: inherit; transition: all 0.15s ease;
+    }
+    .modal-field input:focus, .modal-field select:focus { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+    .modal-actions {
+      display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end;
+    }
+    .modal-cancel-btn {
+      padding: 9px 18px; background: none; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer;
+      color: var(--text-secondary); font-family: inherit; transition: all 0.15s;
+    }
+    .modal-cancel-btn:hover { background: var(--bg); border-color: var(--text-muted); }
+    .modal-confirm-btn {
+      padding: 9px 18px; background: var(--accent-gradient); border: none;
+      border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer;
+      color: #fff; font-family: inherit; transition: all 0.15s ease;
+      box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+    }
+    .modal-confirm-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.35); }
+
+    /* ===== SIDEBAR ADD MEMBER BTN ===== */
+    .reset-btn {
+      width: 100%; margin-top: 6px; padding: 7px;
+      background: none; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text-muted); font-size: 12px;
+      cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 500;
+    }
+    .reset-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+
+    .sidebar-add-member {
+      padding: 4px 8px 8px; flex-shrink: 0;
+    }
+    .sidebar-add-member-btn {
+      width: 100%; padding: 7px 10px; background: none;
+      border: 1.5px dashed var(--border); border-radius: var(--radius-sm);
+      color: var(--text-muted); font-size: 13px; cursor: pointer;
+      transition: all 0.15s; font-family: inherit; text-align: left; font-weight: 500;
+    }
+    .sidebar-add-member-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); border-style: solid; }
+
+    /* ===== NOTIFICATIONS ===== */
+    .notif-wrap {
+      position: relative;
+    }
+    .notif-bell-btn {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      position: relative;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .notif-bell-btn:hover { background: rgba(255,255,255,0.28); }
+    .notif-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #EF4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 3px;
+      pointer-events: none;
+    }
+    .notif-panel {
+      position: fixed;
+      top: 58px;
+      left: 0;
+      width: 252px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      overflow: hidden;
+      display: none;
+    }
+    .notif-panel.open { display: block; }
+    .notif-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .notif-mark-read-btn {
+      font-size: 11px;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .notif-mark-read-btn:hover { background: var(--accent-light); }
+    .notif-list { max-height: 320px; overflow-y: auto; }
+    .notif-empty {
+      padding: 24px 16px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .notif-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-light);
+      cursor: default;
+      transition: background 0.1s;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item.unread { background: var(--accent-light); }
+    .notif-item:hover { background: var(--bg); }
+    .notif-item-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .notif-item-body { flex: 1; min-width: 0; }
+    .notif-item-msg {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .notif-item-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .notif-new-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    /* ===== LANDING PAGE ===== */
+    @keyframes landingFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes landingCardIn {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)    scale(1); }
+    }
+    @keyframes landingFadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to   { opacity: 0; transform: scale(1.04); }
+    }
+    @keyframes landingShake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-8px); }
+      40%     { transform: translateX(8px); }
+      60%     { transform: translateX(-5px); }
+      80%     { transform: translateX(5px); }
+    }
+    .landing-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      /* 메인 앱 인디고 팔레트의 다크 버전 — 진입 시 이질감 최소화 */
+      background: linear-gradient(145deg, #0C0A1E 0%, #13103A 35%, #1A1650 65%, #0F0C2E 100%);
+      display: flex; align-items: center; justify-content: center;
+      animation: landingFadeIn 0.5s ease;
+    }
+    .landing-overlay.closing { animation: landingFadeOut 0.45s ease forwards; pointer-events: none; }
+    .landing-bg-orb {
+      position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none;
+    }
+    .landing-bg-orb-1 {
+      width: 600px; height: 600px; background: rgba(79,70,229,0.22);
+      top: -160px; left: -140px;
+      filter: blur(110px);
+    }
+    .landing-bg-orb-2 {
+      width: 500px; height: 500px; background: rgba(124,58,237,0.18);
+      bottom: -130px; right: -100px;
+      filter: blur(100px);
+    }
+    .landing-bg-orb-3 {
+      width: 300px; height: 300px; background: rgba(139,92,246,0.14);
+      top: 32%; left: 52%;
+      filter: blur(80px);
+    }
+    .landing-bg-orb-4 {
+      width: 380px; height: 380px; background: rgba(55,48,163,0.2);
+      top: 10%; left: 5%;
+      filter: blur(90px);
+    }
+    .landing-card {
+      position: relative; z-index: 1;
+      background: rgba(255,255,255,0.055);
+      backdrop-filter: blur(48px) saturate(1.6);
+      -webkit-backdrop-filter: blur(48px) saturate(1.6);
+      border: 1px solid rgba(255,255,255,0.11);
+      /* 2026 squircle — 카드 자체가 둥글게 */
+      border-radius: 56px;
+      padding: 56px 52px 52px;
+      text-align: center;
+      max-width: 400px; width: calc(100% - 48px);
+      box-shadow:
+        0 48px 120px rgba(0,0,0,0.5),
+        0 8px 32px rgba(79,70,229,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+      animation: landingCardIn 0.55s cubic-bezier(0.34,1.3,0.64,1) 0.1s both;
+    }
+    /* 로고 — 원형 배지 (누끼 성공 시 투명, 실패 시 흰 원) */
+    @keyframes logoGlow {
+      0%, 100% { box-shadow:
+        0 0 0 10px rgba(255,255,255,0.05),
+        0 0 40px 8px  rgba(165,180,252,0.35),
+        0 0 80px 20px rgba(124,58,237,0.2),
+        0 12px 40px   rgba(0,0,0,0.3); }
+      50% { box-shadow:
+        0 0 0 14px rgba(255,255,255,0.07),
+        0 0 60px 16px rgba(165,180,252,0.55),
+        0 0 110px 30px rgba(124,58,237,0.3),
+        0 12px 40px   rgba(0,0,0,0.3); }
+    }
+    .landing-logo-wrap {
+      margin: 0 auto 32px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.95);
+      border: 2px solid rgba(255,255,255,0.5);
+      overflow: hidden;
+      animation: logoGlow 2.8s ease-in-out infinite;
+      transition: background 0.3s;
+    }
+    .landing-logo-wrap.nukki-done {
+      background: none;
+      border: none;
+      overflow: visible;
+      animation: none;
+      width: auto; height: auto;
+      border-radius: 0;
+      margin-bottom: 24px;
+    }
+    .landing-logo-img {
+      width: 104px; height: 104px;
+      object-fit: contain;
+      display: block;
+    }
+    .landing-logo-wrap.nukki-done .landing-logo-img {
+      width: auto; height: 56px;
+      filter: drop-shadow(0 0 14px rgba(255,255,255,0.6))
+              drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+    }
+    .landing-title {
+      font-size: 11px; font-weight: 600; letter-spacing: 4.5px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #A5B4FC 0%, #C4B5FD 55%, #DDD6FE 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 28px;
+    }
+    .landing-input {
+      width: 100%; padding: 15px 24px;
+      /* 완전 pill */
+      border-radius: 999px;
+      border: 1px solid rgba(165,180,252,0.28);
+      background: rgba(79,70,229,0.09);
+      color: #fff; font-size: 15px; font-weight: 500;
+      outline: none; text-align: center;
+      font-family: inherit; box-sizing: border-box;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      margin-bottom: 10px;
+    }
+    .landing-input::placeholder { color: rgba(255,255,255,0.3); }
+    .landing-input:focus {
+      border-color: rgba(165,180,252,0.65);
+      background: rgba(79,70,229,0.15);
+      box-shadow: 0 0 0 4px rgba(79,70,229,0.18);
+    }
+    .landing-input.shake { animation: landingShake 0.35s ease; }
+    .landing-btn {
+      width: 100%; padding: 15px 24px; border: none;
+      /* 완전 pill 버튼 */
+      border-radius: 999px;
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      color: #fff; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      letter-spacing: 2px; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+      box-shadow:
+        0 10px 32px rgba(79,70,229,0.42),
+        inset 0 1px 0 rgba(255,255,255,0.18);
+    }
+    .landing-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+      box-shadow: 0 16px 40px rgba(79,70,229,0.58);
+    }
+    .landing-btn:hover .landing-btn-arrow { transform: translateX(5px); }
+    .landing-btn:active { transform: translateY(0); filter: brightness(0.95); }
+    .landing-btn-arrow { transition: transform 0.22s cubic-bezier(0.34,1.5,0.64,1); flex-shrink: 0; }
+
+    /* ===== TEAM OPERATIONS TABLE ===== */
+    .team-ops-section { margin-top: 20px; }
+    .team-ops-table .op-type-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+    }
+    .op-type-badge.current { background: var(--accent-light); color: var(--accent); }
+    .op-type-badge.next    { background: #FEF3C7; color: #92400E; }
+    .team-detail-list { list-style: none; margin: 4px 0 0; padding: 0; }
+    .team-detail-list li {
+      font-size: 11px; color: var(--text-muted); padding: 1px 0 1px 12px;
+      position: relative; line-height: 1.5;
+    }
+    .team-detail-list li::before {
+      content: '↳'; position: absolute; left: 0;
+      color: var(--accent); font-size: 10px;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside id="sidebar">
+  <div class="sidebar-logo" style="display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="sidebar-logo-icon" id="sidebarLogoIcon">W</div>
+      <div class="sidebar-logo-text">
+        <div class="sidebar-team-name-wrap" id="sidebarTeamNameWrap" onclick="editTeamName()" title="클릭하여 팀명 변경">
+          <span id="sidebarTeamName">팀 이름</span>
+          <svg class="sidebar-edit-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div class="sidebar-sub-label">주간업무보고</div>
+      </div>
+    </div>
+    <div id="notifBellMount"></div>
+  </div>
+  <div id="notifPanel" class="notif-panel"></div>
+
+  <div class="sidebar-period">
+    <label>보고 기간</label>
+    <div class="period-display" id="periodDisplay" onclick="togglePeriodInputs()">
+      <span id="periodLabel">로딩 중...</span>
+      <span class="period-edit-icon">›</span>
+    </div>
+    <div class="period-inputs" id="periodInputs">
+      <input type="number" id="yearInput" placeholder="년도" min="2020" max="2035">
+      <select id="monthInput"></select>
+      <select id="weekInput"></select>
+      <button class="period-apply-btn" onclick="applyPeriod()">적용</button>
+    </div>
+  </div>
+
+  <div id="teamTab" class="sidebar-item" onclick="switchTab('__team__')">
+    팀 현황
+  </div>
+
+  <div class="sidebar-section-label">팀원</div>
+  <div id="memberList"></div>
+  <div class="sidebar-add-member">
+    <button class="sidebar-add-member-btn" onclick="showAddMemberModal()">+ 팀원 추가</button>
+  </div>
+
+  <div class="sidebar-spacer"></div>
+
+  <div class="sidebar-footer">
+    <button class="export-btn" onclick="exportToExcel()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Excel 내보내기
+    </button>
+    <button class="reset-btn" onclick="resetAllData()">전체 데이터 초기화</button>
+  </div>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main id="main">
+  <div id="mainContent"></div>
+</main>
+
+<!-- ===== CHAT FAB ===== -->
+<button id="chatFab" onclick="toggleChat()" title="AI 어시스턴트">
+  🤖
+  <span class="fab-label">AI</span>
+</button>
+
+<!-- ===== CHAT PANEL ===== -->
+<aside id="chatPanel">
+  <div class="chat-panel-header">
+    <span class="chat-panel-title">🤖 AI 어시스턴트</span>
+    <button class="chat-close-btn" onclick="closeChat()">×</button>
+  </div>
+  <div id="chatMessages"></div>
+  <div id="chatInputArea" class="chat-input-area">
+    <textarea id="chatTextarea" class="chat-textarea" rows="2"
+      placeholder="이번 주 뭐가 막혔어요? 같이 풀어봐요 👀"
+      onkeydown="handleChatKey(event)"></textarea>
+    <button id="chatSendBtn" class="chat-send-btn" onclick="sendChatMessage()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</aside>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const STORAGE_KEY = 'weekly_report_data_v7';
+const LAST_VISIT_KEY = 'weekly_report_last_visit';
+const LANDING_TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3시간
+
+// ============================================================
+// STATE
+// ============================================================
+let state = null;
+
+function getEmptyMemberData() {
+  return { tasks: [], operations: [], deployments: [], status: 'done', updatedAt: null };
+}
+
+function getCurrentWeekOfMonth() {
+  const today = new Date();
+  return { year: today.getFullYear(), month: today.getMonth() + 1, week: Math.ceil(today.getDate() / 7) };
+}
+
+function getDefaultState() {
+  const { year, month, week } = getCurrentWeekOfMonth();
+  return {
+    meta: {
+      teamName: '',
+      year, month, week,
+      members: [
+        { id: 'cho_nakwoon',    name: '조낙운',  division: '병원' },
+        { id: 'cho_minhee',    name: '조민희',  division: '인프라&공통' },
+        { id: 'lee_seongdae',  name: '이성대',  division: '인프라&공통' },
+        { id: 'kim_yujeong',   name: '김유정',  division: '제약' },
+        { id: 'jung_jaeyoung', name: '정재영',  division: '제약' },
+        { id: 'oh_hyunmin',   name: '오현민',  division: '인프라&공통' },
+      ],
+    },
+    activeTab: '__team__',
+    teamViewMode: 'table',
+    favorites: [],
+    chatMessages: [],
+    members: {
+      cho_nakwoon: {
+        tasks: [
+          {
+            id: 'task_cn1', kpiProduct: '의사랑 AI 어시스턴트', division: '병원',
+            deadline: '2026-06-30', overallProgress: 45,
+            currentWeekItems: [
+              { id: 'ci1', text: 'UI 프로토타입 1차 완료', progress: 100, details: [{ id: 'd1', text: 'Figma 화면 설계 완료' }] },
+              { id: 'ci2', text: 'API 연동 테스트', progress: 60, details: [] },
+            ],
+            nextWeekItems: [
+              { id: 'ni1', text: '2차 프로토타입 개발 시작', progress: 0, details: [] },
+              { id: 'ni2', text: '사용자 테스트 일정 확정', progress: 0, details: [] },
+            ],
+            issues: [{ id: 'iss1', text: 'API 응답 속도 개선 필요 (현재 3초 → 목표 1초)' }],
+          },
+          {
+            id: 'task_cn2', kpiProduct: '원무 자동화 시스템', division: '병원',
+            deadline: '2026-09-30', overallProgress: 20,
+            currentWeekItems: [
+              { id: 'ci3', text: '요구사항 분석 미팅', progress: 100, details: [] },
+            ],
+            nextWeekItems: [
+              { id: 'ni3', text: '기능 명세서 작성', progress: 0, details: [] },
+            ],
+            issues: [],
+          },
+        ],
+        operations: [
+          { id: 'op1', text: '닥터인포 메인 화면 오류 수정 요청 대응', weekType: 'current' },
+          { id: 'op2', text: '신규 병원 온보딩 지원', weekType: 'current' },
+        ],
+        deployments: [
+          {
+            id: 'dep1', product: '의사랑', round: '2차', deployDate: '2026-03-20',
+            counts: { feature: 3, bug: 2 },
+            progressText: '스테이징 배포 완료, 운영 배포 예정',
+            redmineItems: [
+              { id: 'rm1', text: '206721 CRM 본인인증 수정' },
+              { id: 'rm2', text: '206890 처방전 출력 오류 수정' },
+            ],
+            issues: '운영 배포 일정 PM 확인 필요',
+          },
+        ],
+      },
+      cho_minhee: {
+        tasks: [
+          {
+            id: 'task_cm1', kpiProduct: 'CRMV2 서비스챗봇', division: '인프라&공통',
+            deadline: '2026-05-31', overallProgress: 65,
+            currentWeekItems: [
+              { id: 'ci4', text: '키메스 시나리오 작업 완료', progress: 100, details: [{ id: 'd2', text: '신규 화면 3개 설계 완료' }] },
+              { id: 'ci5', text: 'QA 테스트 진행 중', progress: 70, details: [] },
+            ],
+            nextWeekItems: [
+              { id: 'ni4', text: 'FAQ 화면 추가 반영', progress: 0, details: [] },
+              { id: 'ni5', text: '챗봇 응답 정확도 개선', progress: 0, details: [] },
+            ],
+            issues: [{ id: 'iss2', text: '디자인 QC 피드백 반영 지연' }],
+          },
+        ],
+        operations: [
+          { id: 'op3', text: '닥터인포 메인 개편 요청 검토', weekType: 'current' },
+        ],
+        deployments: [],
+      },
+      lee_seongdae: {
+        tasks: [
+          {
+            id: 'task_ls1', kpiProduct: 'PAless 인증 모듈', division: '인프라&공통',
+            deadline: '2026-04-30', overallProgress: 80,
+            currentWeekItems: [
+              { id: 'ci6', text: '유티엔진 본인인증 서비스 수정 완료', progress: 100, details: [] },
+              { id: 'ci7', text: '테스트 케이스 80% 완료', progress: 80, details: [{ id: 'd3', text: '엣지 케이스 추가 검토 중' }] },
+            ],
+            nextWeekItems: [
+              { id: 'ni6', text: '운영 배포 준비', progress: 0, details: [] },
+            ],
+            issues: [],
+          },
+        ],
+        operations: [
+          { id: 'op4', text: '레거시 인증 시스템 유지보수', weekType: 'current' },
+          { id: 'op5', text: '신규 인증 방식 기술 검토', weekType: 'next' },
+        ],
+        deployments: [
+          {
+            id: 'dep2', product: 'PAless', round: '1차', deployDate: '2026-03-15',
+            counts: { feature: 1, bug: 3 },
+            progressText: '배포 완료',
+            redmineItems: [{ id: 'rm3', text: '205100 본인인증 토큰 만료 이슈' }],
+            issues: '',
+          },
+        ],
+      },
+      kim_yujeong: {
+        tasks: [
+          {
+            id: 'task_ky1', kpiProduct: '릴리제약 환급 솔루션', division: '제약',
+            deadline: '2026-05-31', overallProgress: 30,
+            currentWeekItems: [
+              { id: 'ci8', text: 'Azure OCR 연동 테스트', progress: 50, details: [{ id: 'd4', text: '처방전 인식률 92% 달성' }] },
+              { id: 'ci9', text: '환급 프로세스 플로우 설계', progress: 100, details: [] },
+            ],
+            nextWeekItems: [
+              { id: 'ni7', text: 'OCR 정확도 개선 작업', progress: 0, details: [] },
+              { id: 'ni8', text: '약국 연동 API 개발', progress: 0, details: [] },
+            ],
+            issues: [{ id: 'iss3', text: '처방전 이미지 품질 기준 정의 필요' }],
+          },
+          {
+            id: 'task_ky2', kpiProduct: '제약 DX 플랫폼', division: '제약',
+            deadline: '2026-12-31', overallProgress: 10,
+            currentWeekItems: [
+              { id: 'ci10', text: '기획안 1차 작성', progress: 80, details: [] },
+            ],
+            nextWeekItems: [
+              { id: 'ni9', text: '팀 내부 검토 미팅', progress: 0, details: [] },
+            ],
+            issues: [],
+          },
+        ],
+        operations: [
+          { id: 'op6', text: '제약사 데모 요청 대응 (화이자)', weekType: 'current' },
+        ],
+        deployments: [],
+      },
+      jung_jaeyoung: {
+        tasks: [
+          {
+            id: 'task_jj1', kpiProduct: '임상시험 데이터 관리 시스템', division: '제약',
+            deadline: '2026-07-31', overallProgress: 25,
+            currentWeekItems: [
+              { id: 'ci11', text: 'DB 스키마 설계 완료', progress: 100, details: [] },
+              { id: 'ci12', text: '백엔드 API 개발 진행', progress: 40, details: [{ id: 'd5', text: 'REST API 20개 중 8개 완료' }] },
+            ],
+            nextWeekItems: [
+              { id: 'ni10', text: 'API 개발 계속 (목표 15개)', progress: 0, details: [] },
+              { id: 'ni11', text: '프론트엔드 연동 시작', progress: 0, details: [] },
+            ],
+            issues: [],
+          },
+        ],
+        operations: [
+          { id: 'op7', text: '기존 EDC 시스템 데이터 마이그레이션 검토', weekType: 'current' },
+        ],
+        deployments: [],
+      },
+      oh_hyunmin: {
+        tasks: [
+          {
+            id: 'task_oh1', kpiProduct: '의사랑 DB 백업 자동화', division: '인프라&공통',
+            deadline: '2026-08-31', overallProgress: 15,
+            currentWeekItems: [
+              { id: 'ci13', text: '운영 환경 구축 완료', progress: 100, details: [] },
+              { id: 'ci14', text: '백업 스크립트 개발', progress: 30, details: [] },
+            ],
+            nextWeekItems: [
+              { id: 'ni12', text: '젠킨스 CI/CD 파이프라인 구성', progress: 0, details: [{ id: 'd6', text: '스테이징 환경 먼저 적용' }] },
+            ],
+            issues: [{ id: 'iss4', text: '운영 서버 접근 권한 승인 대기 중' }],
+          },
+        ],
+        operations: [
+          { id: 'op8', text: '개발서버 디스크 용량 모니터링', weekType: 'current' },
+          { id: 'op9', text: '보안 패치 적용 계획 수립', weekType: 'next' },
+        ],
+        deployments: [],
+      },
+    },
+  };
+}
+
+// ============================================================
+// STATE PERSISTENCE
+// ============================================================
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function setMemberStatus(memberId, status) {
+  if (state.members[memberId]) {
+    state.members[memberId].status = status;
+    if (status === 'done') state.members[memberId].updatedAt = Date.now();
+  }
+  saveState();
+  const notifType = status === 'done' ? 'status_done' : 'status_editing';
+  pushNotification(notifType, memberId, getMember(memberId)?.name || memberId);
+  renderSidebar();
+  renderMain();
+}
+
+function formatUpdatedAt(ts) {
+  if (!ts) return null;
+  const d = new Date(ts);
+  const mo = d.getMonth() + 1, day = d.getDate();
+  const hh = String(d.getHours()).padStart(2,'0'), mm = String(d.getMinutes()).padStart(2,'0');
+  return `${mo}/${day} ${hh}:${mm}`;
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) { state = getDefaultState(); return; }
+    const saved = JSON.parse(raw);
+    state = getDefaultState();
+    if (saved.meta)      Object.assign(state.meta, saved.meta);
+    if (saved.members)   Object.assign(state.members, saved.members);
+    if (saved.activeTab  !== undefined) state.activeTab  = saved.activeTab;
+    if (saved.favorites  !== undefined) state.favorites  = saved.favorites;
+    if (saved.teamViewMode !== undefined) state.teamViewMode = saved.teamViewMode;
+  } catch(e) {
+    state = getDefaultState();
+  }
+}
+
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+}
+
+// ============================================================
+// XSS PREVENTION
+// ============================================================
+function esc(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function periodText() {
+  const { year, month, week } = state.meta;
+  return `${year}년 ${month}월 ${week}주차`;
+}
+
+function getMember(id) {
+  return state.meta.members.find(m => m.id === id);
+}
+
+function getMemberData(id) {
+  return state.members[id] || getEmptyMemberData();
+}
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+function updateSidebarTeamName() {
+  const name = state.meta.teamName || '팀 이름';
+  const nameEl = document.getElementById('sidebarTeamName');
+  const iconEl  = document.getElementById('sidebarLogoIcon');
+  if (nameEl) nameEl.textContent = name;
+  if (iconEl)  iconEl.textContent = name.charAt(0) || 'W';
+}
+
+function editTeamName() {
+  const wrap = document.getElementById('sidebarTeamNameWrap');
+  if (!wrap) return;
+  const current = state.meta.teamName || '';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = current;
+  input.className = 'sidebar-team-name-input';
+  input.maxLength = 24;
+
+  function save() {
+    const val = input.value.trim();
+    if (val && val !== current) {
+      state.meta.teamName = val;
+      saveState();
+      if (state.activeTab === '__team__') renderMain();
+    }
+    updateSidebarTeamName();
+    // input 제거 후 wrap 원복
+    input.replaceWith(document.getElementById('sidebarTeamNameWrap') ? input : wrap);
+    renderSidebar();
+  }
+
+  input.onblur = save;
+  input.onkeydown = e => {
+    if (e.key === 'Enter')  { input.blur(); }
+    if (e.key === 'Escape') { input.value = current; input.blur(); }
+  };
+
+  wrap.replaceWith(input);
+  input.select();
+}
+
+function renderSidebar() {
+  updateSidebarTeamName();
+
+  // Period display
+  document.getElementById('periodLabel').textContent = periodText();
+
+  // Year input
+  const yearEl = document.getElementById('yearInput');
+  if (yearEl) yearEl.value = state.meta.year;
+
+  // Month select
+  const monthEl = document.getElementById('monthInput');
+  if (monthEl) {
+    monthEl.innerHTML = Array.from({length: 12}, (_, i) =>
+      `<option value="${i+1}"${state.meta.month === i+1 ? ' selected' : ''}>${i+1}월</option>`
+    ).join('');
+  }
+
+  // Week select
+  const weekEl = document.getElementById('weekInput');
+  if (weekEl) {
+    weekEl.innerHTML = Array.from({length: 5}, (_, i) =>
+      `<option value="${i+1}"${state.meta.week === i+1 ? ' selected' : ''}>${i+1}주차</option>`
+    ).join('');
+  }
+
+  // 팀 현황 tab active 상태 갱신
+  const teamTabEl = document.getElementById('teamTab');
+  if (teamTabEl) {
+    teamTabEl.className = 'sidebar-item' + (state.activeTab === '__team__' ? ' active' : '');
+  }
+
+  // Member list
+  document.getElementById('memberList').innerHTML = state.meta.members.map(m => {
+    const mdata = state.members[m.id] || {};
+    const hasDone = mdata.updatedAt != null;
+    const timeStr = hasDone ? formatUpdatedAt(mdata.updatedAt) : null;
+    return `<div class="sidebar-item${state.activeTab === m.id ? ' active' : ''}" onclick="switchTab('${m.id}')">
+      <div class="sidebar-item-row">
+        <span class="sidebar-item-name">${esc(m.name)}</span>
+        ${hasDone ? '<span class="sidebar-done-badge">✓</span>' : ''}
+        <button class="member-delete-btn" onclick="removeMember('${m.id}',event)" title="팀원 삭제">×</button>
+      </div>
+      ${timeStr ? `<div class="sidebar-item-time">${timeStr}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // 벨 마운트 동기화 (renderSidebar가 DOM을 교체하지 않으므로 badge만 갱신)
+  updateNotifBadge();
+}
+
+function togglePeriodInputs() {
+  document.getElementById('periodInputs').classList.toggle('show');
+}
+
+function applyPeriod() {
+  const year  = Number(document.getElementById('yearInput').value);
+  const month = Number(document.getElementById('monthInput').value);
+  const week  = Number(document.getElementById('weekInput').value);
+  if (year >= 2020 && year <= 2035 && month >= 1 && month <= 12 && week >= 1 && week <= 5) {
+    state.meta.year  = year;
+    state.meta.month = month;
+    state.meta.week  = week;
+    saveState();
+  }
+  // Update display
+  document.getElementById('periodLabel').textContent = periodText();
+  // Close inputs
+  document.getElementById('periodInputs').classList.remove('show');
+  // Flash confirmation
+  const display = document.getElementById('periodDisplay');
+  display.classList.remove('applied');
+  void display.offsetWidth; // reflow
+  display.classList.add('applied');
+  setTimeout(() => display.classList.remove('applied'), 1200);
+  // Re-render main (period shown in header)
+  renderMain();
+}
+
+function updatePeriod(field, value) {
+  // kept for compatibility but no longer used by HTML
+  state.meta[field] = Number(value);
+  saveState();
+}
+
+function switchTab(memberId) {
+  state.activeTab = memberId;
+  saveState();
+  renderSidebar();
+  renderMain();
+}
+
+// ============================================================
+// MAIN RENDER
+// ============================================================
+function renderMain() {
+  if (state.activeTab === '__team__') {
+    document.getElementById('mainContent').innerHTML = renderTeamView();
+    return;
+  }
+  const memberId = state.activeTab;
+  const member = getMember(memberId);
+  const data = getMemberData(memberId);
+
+  const mdata = state.members[memberId] || {};
+  const isEditing = mdata.status === 'editing';
+  document.getElementById('mainContent').innerHTML = `
+    <div class="member-header">
+      <h1>${esc(member.name)}</h1>
+      <span class="period-tag">· ${periodText()} 주간보고</span>
+      <div class="member-status-bar">
+        <button class="member-reset-btn" onclick="resetMemberData('${memberId}')" title="${esc(member.name)}님 데이터 초기화">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          초기화
+        </button>
+        ${isEditing
+          ? `<button class="status-btn status-done-btn" onclick="setMemberStatus('${memberId}','done')">작성완료</button>`
+          : `${mdata.updatedAt ? '<span class="status-done-label"><span class="status-check-icon">✓</span> 작성완료</span>' : ''}<button class="status-btn status-edit-btn" onclick="setMemberStatus('${memberId}','editing')">수정하기</button>`
+        }
+      </div>
+    </div>
+    <div class="content-body${isEditing ? '' : ' content-locked'}">
+      ${renderTasksSection(memberId, data)}
+      ${renderOperationsSection(memberId, data)}
+      ${renderDeploymentsSection(memberId, data)}
+    </div>
+  `;
+}
+
+// ============================================================
+// TASKS SECTION
+// ============================================================
+function renderTasksSection(memberId, data) {
+  const inner = data.tasks.length === 0
+    ? '<div class="empty-state">과제를 추가하세요. 과제별로 금주활동, 차주계획, 이슈사항을 관리합니다.</div>'
+    : data.tasks.map(t => renderTaskCard(memberId, t)).join('');
+
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">과제</span>
+        <button class="add-btn" onclick="addTask('${memberId}')">+ 과제 추가</button>
+      </div>
+      ${inner}
+    </div>`;
+}
+
+function renderTaskCard(memberId, task) {
+  const pct = task.overallProgress || 0;
+  const progressBarWidth = Math.min(100, Math.max(0, pct));
+
+  const currentItemsHtml = (task.currentWeekItems || []).map(item =>
+    renderActivityItem(memberId, task.id, 'current', item)
+  ).join('');
+
+  const nextItemsHtml = (task.nextWeekItems || []).map(item =>
+    renderActivityItem(memberId, task.id, 'next', item)
+  ).join('');
+
+  const issueItemsHtml = (task.issues || []).map(issue =>
+    renderIssueItem(memberId, task.id, issue)
+  ).join('');
+
+  return `
+    <div class="task-card" data-task-id="${task.id}">
+      <div class="task-meta">
+        <div class="task-meta-header">
+          <div contenteditable="true" class="task-kpi"
+               placeholder="KPI / 제품명"
+               data-member="${memberId}" data-task="${task.id}" data-field="kpiProduct"
+               onblur="updateTaskCEField(this)">${esc(task.kpiProduct || '')}</div>
+          <button class="task-remove-btn" onclick="removeTask('${memberId}','${task.id}')">🗑 과제 삭제</button>
+        </div>
+        <div class="task-fields">
+          <div class="field-group">
+            <span class="field-label">기한</span>
+            <input type="date" class="field-input" value="${esc(task.deadline || '')}"
+                   onchange="updateTaskField('${memberId}','${task.id}','deadline',this.value)">
+          </div>
+          <div class="field-group">
+            <span class="field-label">진척율 (%)</span>
+            <input type="number" class="field-input" min="0" max="100"
+                   value="${pct}"
+                   onchange="updateTaskField('${memberId}','${task.id}','overallProgress',+this.value)">
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:${progressBarWidth}%"></div>
+        </div>
+        <span class="progress-pct">${pct}%</span>
+      </div>
+
+      <div class="task-body" style="margin-top:12px;">
+        <div class="activity-col">
+          <h4 class="current">금주활동</h4>
+          ${currentItemsHtml}
+          <button class="add-item-btn"
+                  onclick="addTaskItem('${memberId}','${task.id}','current')">+ 항목 추가</button>
+        </div>
+        <div class="activity-col">
+          <h4 class="next">차주계획</h4>
+          ${nextItemsHtml}
+          <button class="add-item-btn"
+                  onclick="addTaskItem('${memberId}','${task.id}','next')">+ 항목 추가</button>
+        </div>
+
+        <div class="task-issues" style="grid-column:1/-1;">
+          <div class="issues-header">⚠ 이슈사항</div>
+          ${issueItemsHtml}
+          <button class="add-item-btn"
+                  onclick="addIssueItem('${memberId}','${task.id}')">+ 이슈 추가</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderActivityItem(memberId, taskId, type, item) {
+  const detailsHtml = (item.details || []).map(function(d) {
+    return `<div class="detail-item" data-detail-id="${d.id}">
+      <span class="detail-prefix">▸</span>
+      <div contenteditable="true" class="detail-text"
+           placeholder="상세 내용"
+           data-member="${memberId}" data-task="${taskId}"
+           data-type="${type}" data-item-id="${item.id}" data-detail-id="${d.id}"
+           onblur="updateDetailText(this)">${esc(d.text || '')}</div>
+      <button class="mini-remove-btn"
+              onclick="removeDetailItem('${memberId}','${taskId}','${type}','${item.id}','${d.id}')">✕</button>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="activity-item" data-item-id="${item.id}">
+      <div class="activity-main-row">
+        <div contenteditable="true" class="activity-text"
+             placeholder="활동 내용"
+             data-member="${memberId}" data-task="${taskId}"
+             data-type="${type}" data-item-id="${item.id}"
+             onblur="updateActivityText(this)">${esc(item.text || '')}</div>
+        <div class="progress-input-wrap">
+          <span class="progress-wrap-label">진척율</span>
+          <input type="number" class="progress-input" min="0" max="100"
+                 value="${item.progress !== '' && item.progress != null ? item.progress : ''}"
+                 placeholder="0"
+                 onchange="updateActivityProgress(this,'${memberId}','${taskId}','${type}','${item.id}')">
+        </div>
+        <button class="mini-add-detail-btn"
+                onclick="addDetailItem('${memberId}','${taskId}','${type}','${item.id}')"
+                title="상세내역 추가">+상세</button>
+        <button class="mini-remove-btn"
+                onclick="removeTaskItem('${memberId}','${taskId}','${type}','${item.id}')">✕</button>
+      </div>
+      ${detailsHtml ? '<div class="detail-items">' + detailsHtml + '</div>' : ''}
+    </div>`;
+}
+
+function renderIssueItem(memberId, taskId, issue) {
+  return `
+    <div class="issue-item" data-issue-id="${issue.id}">
+      <div contenteditable="true" class="issue-text"
+           placeholder="이슈 내용"
+           data-member="${memberId}" data-task="${taskId}" data-issue-id="${issue.id}"
+           onblur="updateIssueText(this)">${esc(issue.text || '')}</div>
+      <button class="mini-remove-btn"
+              onclick="removeIssueItem('${memberId}','${taskId}','${issue.id}')">✕</button>
+    </div>`;
+}
+
+// ============================================================
+// OPERATIONS SECTION
+// ============================================================
+function renderOperationsSection(memberId, data) {
+  const ops = data.operations || [];
+  const inner = ops.length === 0
+    ? '<div class="empty-state">운영/요청 사항을 추가하세요.</div>'
+    : ops.map(op => `
+        <div class="op-item" data-op-id="${op.id}">
+          <span class="week-badge ${op.weekType === 'next' ? 'next' : 'current'}"
+                onclick="toggleOpWeekType('${memberId}','${op.id}')"
+                title="클릭하여 금주/차주 전환">
+            ${op.weekType === 'next' ? '차주' : '금주'}
+          </span>
+          <div contenteditable="true" class="op-text"
+               placeholder="운영/요청 내용"
+               data-member="${memberId}" data-op-id="${op.id}"
+               onblur="updateOpText(this)">${esc(op.text || '')}</div>
+          <button class="mini-remove-btn"
+                  onclick="removeOperation('${memberId}','${op.id}')">✕</button>
+        </div>`).join('');
+
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">운영 / 요청 사항</span>
+        <button class="add-btn" onclick="addOperation('${memberId}')">+ 추가</button>
+      </div>
+      ${inner}
+    </div>`;
+}
+
+// ============================================================
+// DEPLOYMENTS SECTION
+// ============================================================
+function renderDeploymentsSection(memberId, data) {
+  const deploys = data.deployments || [];
+  const canAdd = deploys.length < 3;
+  const inner = deploys.length === 0
+    ? '<div class="empty-state">제품 배포 항목을 추가하세요. (최대 3개)</div>'
+    : deploys.map(d => renderDeployCard(memberId, d)).join('');
+
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">제품 배포</span>
+        ${canAdd
+          ? `<button class="add-btn" onclick="addDeployment('${memberId}')">+ 추가</button>`
+          : `<span style="font-size:11px;color:var(--text-muted);">최대 3개</span>`}
+      </div>
+      ${inner}
+    </div>`;
+}
+
+function renderDeployCard(memberId, d) {
+  const redmineHtml = (d.redmineItems || []).map(item => `
+    <div class="redmine-item">
+      <div contenteditable="true" class="redmine-text"
+           placeholder="레드마인 일감"
+           data-member="${memberId}" data-deploy-id="${d.id}" data-redmine-id="${item.id}"
+           onblur="updateRedmineText(this)">${esc(item.text || '')}</div>
+      <button class="mini-remove-btn"
+              onclick="removeRedmineItem('${memberId}','${d.id}','${item.id}')">✕</button>
+    </div>`).join('');
+
+  return `
+    <div class="deploy-card" data-deploy-id="${d.id}">
+      <div class="deploy-card-header">
+        <div contenteditable="true" class="deploy-product-name"
+             placeholder="제품명"
+             data-member="${memberId}" data-deploy-id="${d.id}" data-deploy-field="product"
+             onblur="updateDeployCEField(this)">${esc(d.product || '')}</div>
+        <button class="task-remove-btn"
+                onclick="removeDeployment('${memberId}','${d.id}')">✕ 삭제</button>
+      </div>
+      <div class="deploy-fields">
+        <div class="deploy-field">
+          <span class="field-label">차수</span>
+          <input type="text" class="deploy-input" placeholder="예: 1차"
+                 value="${esc(d.round || '')}"
+                 onchange="updateDeployInputField('${memberId}','${d.id}','round',this.value)">
+        </div>
+        <div class="deploy-field">
+          <span class="field-label">배포 기한</span>
+          <input type="date" class="deploy-input"
+                 value="${esc(d.deployDate || '')}"
+                 onchange="updateDeployInputField('${memberId}','${d.id}','deployDate',this.value)">
+        </div>
+        <div class="deploy-field">
+          <span class="field-label">기능 건수</span>
+          <input type="number" class="deploy-input" placeholder="0" min="0"
+                 value="${d.counts && d.counts.feature !== '' ? d.counts.feature : ''}"
+                 onchange="updateDeployCount('${memberId}','${d.id}','feature',this.value)">
+        </div>
+        <div class="deploy-field">
+          <span class="field-label">오류 건수</span>
+          <input type="number" class="deploy-input" placeholder="0" min="0"
+                 value="${d.counts && d.counts.bug !== '' ? d.counts.bug : ''}"
+                 onchange="updateDeployCount('${memberId}','${d.id}','bug',this.value)">
+        </div>
+      </div>
+      <div class="deploy-progress-row">
+        <div class="deploy-sub-label">진척 현황</div>
+        <div contenteditable="true" class="deploy-progress-text"
+             placeholder="배포 진척 내용을 입력하세요"
+             data-member="${memberId}" data-deploy-id="${d.id}" data-deploy-field="progressText"
+             onblur="updateDeployCEField(this)">${esc(d.progressText || '')}</div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div class="deploy-sub-label">레드마인 일감</div>
+        ${redmineHtml}
+        <button class="add-item-btn"
+                onclick="addRedmineItem('${memberId}','${d.id}')">+ 레드마인 추가</button>
+      </div>
+      <div>
+        <div class="deploy-sub-label">이슈사항</div>
+        <div contenteditable="true" class="deploy-issues-text"
+             placeholder="이슈사항을 입력하세요"
+             data-member="${memberId}" data-deploy-id="${d.id}" data-deploy-field="issues"
+             onblur="updateDeployCEField(this)">${esc(d.issues || '')}</div>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// CRUD — TASKS
+// ============================================================
+function addTask(memberId) {
+  const member = getMember(memberId);
+  const task = {
+    id: generateId(),
+    kpiProduct: '',
+    division: member ? member.division : '기타',
+    deadline: '',
+    overallProgress: 0,
+    currentWeekItems: [],
+    nextWeekItems: [],
+    issues: [],
+  };
+  getMemberData(memberId).tasks.push(task);
+  saveState();
+  pushNotification('task_add', memberId, getMember(memberId)?.name || memberId, task.kpiProduct || '새 과제');
+  renderMain();
+  const totalTasks = getMemberData(memberId).tasks.length;
+  showToast('✓ 과제가 추가되었습니다 (총 ' + totalTasks + '개)');
+  requestAnimationFrame(() => {
+    const card = document.querySelector('.task-card[data-task-id="' + task.id + '"]');
+    if (card) {
+      card.classList.add('new-item');
+      showTaskPopup('새 과제가 추가되었습니다', 'KPI / 제품명을 입력해 주세요');
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.querySelector('.task-kpi')?.focus();
+    }
+  });
+}
+
+function removeTask(memberId, taskId) {
+  if (!confirm('이 과제를 삭제하시겠습니까?')) return;
+  const data = getMemberData(memberId);
+  const taskName = data.tasks.find(t => t.id === taskId)?.kpiProduct || '과제';
+  data.tasks = data.tasks.filter(t => t.id !== taskId);
+  saveState();
+  pushNotification('task_delete', memberId, getMember(memberId)?.name || memberId, taskName);
+  renderMain();
+}
+
+function updateTaskCEField(el) {
+  const { member: memberId, task: taskId, field } = el.dataset;
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (task) { task[field] = el.textContent.trim(); saveState(); }
+}
+
+function updateTaskField(memberId, taskId, field, value) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (task) { task[field] = value; saveState(); }
+  // Re-render for progress bar update
+  if (field === 'overallProgress') renderMain();
+}
+
+function addTaskItem(memberId, taskId, type) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const key = type === 'current' ? 'currentWeekItems' : 'nextWeekItems';
+  const newItem = { id: generateId(), text: '', progress: 0, details: [] };
+  task[key].push(newItem);
+  saveState();
+  renderMain();
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.activity-item[data-item-id="' + newItem.id + '"]');
+    if (el) {
+      el.classList.add('new-sub-item');
+      el.querySelector('.activity-text')?.focus();
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+}
+
+function removeTaskItem(memberId, taskId, type, itemId) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const key = type === 'current' ? 'currentWeekItems' : 'nextWeekItems';
+  task[key] = task[key].filter(i => i.id !== itemId);
+  saveState();
+  renderMain();
+}
+
+function updateActivityText(el) {
+  const { member: memberId, task: taskId, type, itemId } = el.dataset;
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const key = type === 'current' ? 'currentWeekItems' : 'nextWeekItems';
+  const item = task[key].find(i => i.id === itemId);
+  if (item) { item.text = el.textContent.trim(); saveState(); }
+}
+
+function updateActivityProgress(el, memberId, taskId, type, itemId) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const key = type === 'current' ? 'currentWeekItems' : 'nextWeekItems';
+  const item = task[key].find(i => i.id === itemId);
+  if (item) { item.progress = el.value !== '' ? Number(el.value) : ''; saveState(); }
+}
+
+function addIssueItem(memberId, taskId) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const newIssue = { id: generateId(), text: '' };
+  task.issues.push(newIssue);
+  saveState();
+  renderMain();
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.issue-item[data-issue-id="' + newIssue.id + '"]');
+    if (el) {
+      el.classList.add('new-sub-item');
+      el.querySelector('.activity-text')?.focus();
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+}
+
+function removeIssueItem(memberId, taskId, issueId) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  task.issues = task.issues.filter(i => i.id !== issueId);
+  saveState();
+  renderMain();
+}
+
+function updateIssueText(el) {
+  const { member: memberId, task: taskId, issueId } = el.dataset;
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const issue = task.issues.find(i => i.id === issueId);
+  if (issue) { issue.text = el.textContent.trim(); saveState(); }
+}
+
+function addDetailItem(memberId, taskId, type, itemId) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const key = type === 'current' ? 'currentWeekItems' : 'nextWeekItems';
+  const item = task[key].find(i => i.id === itemId);
+  if (!item) return;
+  if (!item.details) item.details = [];
+  const newDetail = { id: generateId(), text: '' };
+  item.details.push(newDetail);
+  saveState();
+  renderMain();
+  requestAnimationFrame(function() {
+    const el = document.querySelector('.detail-item[data-detail-id="' + newDetail.id + '"]');
+    if (el) { el.querySelector('.detail-text')?.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  });
+}
+
+function removeDetailItem(memberId, taskId, type, itemId, detailId) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const key = type === 'current' ? 'currentWeekItems' : 'nextWeekItems';
+  const item = task[key].find(i => i.id === itemId);
+  if (!item || !item.details) return;
+  item.details = item.details.filter(function(d) { return d.id !== detailId; });
+  saveState();
+  renderMain();
+}
+
+function updateDetailText(el) {
+  const { member: memberId, task: taskId, type, itemId, detailId } = el.dataset;
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const key = type === 'current' ? 'currentWeekItems' : 'nextWeekItems';
+  const item = task[key].find(i => i.id === itemId);
+  if (!item || !item.details) return;
+  const detail = item.details.find(function(d) { return d.id === detailId; });
+  if (detail) { detail.text = el.textContent.trim(); saveState(); }
+}
+
+// ============================================================
+// CRUD — OPERATIONS
+// ============================================================
+function addOperation(memberId) {
+  const newOp = { id: generateId(), text: '', weekType: 'current' };
+  getMemberData(memberId).operations.push(newOp);
+  saveState();
+  renderMain();
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.op-item[data-op-id="' + newOp.id + '"]');
+    if (el) {
+      el.classList.add('new-sub-item');
+      el.querySelector('.op-text')?.focus();
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+}
+
+function removeOperation(memberId, opId) {
+  const data = getMemberData(memberId);
+  data.operations = data.operations.filter(o => o.id !== opId);
+  saveState();
+  renderMain();
+}
+
+function updateOpText(el) {
+  const { member: memberId, opId } = el.dataset;
+  const op = getMemberData(memberId).operations.find(o => o.id === opId);
+  if (op) { op.text = el.textContent.trim(); saveState(); }
+}
+
+function toggleOpWeekType(memberId, opId) {
+  const op = getMemberData(memberId).operations.find(o => o.id === opId);
+  if (op) {
+    op.weekType = op.weekType === 'current' ? 'next' : 'current';
+    saveState();
+    renderMain();
+  }
+}
+
+// ============================================================
+// CRUD — DEPLOYMENTS
+// ============================================================
+function addDeployment(memberId) {
+  const data = getMemberData(memberId);
+  if (data.deployments.length >= 3) return;
+  data.deployments.push({
+    id: generateId(),
+    product: '', round: '', deployDate: '',
+    counts: { feature: '', bug: '' },
+    progressText: '',
+    redmineItems: [],
+    issues: '',
+  });
+  saveState();
+  renderMain();
+}
+
+function removeDeployment(memberId, deployId) {
+  if (!confirm('배포 항목을 삭제하시겠습니까?')) return;
+  const data = getMemberData(memberId);
+  data.deployments = data.deployments.filter(d => d.id !== deployId);
+  saveState();
+  renderMain();
+}
+
+function updateDeployCEField(el) {
+  const { member: memberId, deployId, deployField: field } = el.dataset;
+  const deploy = getMemberData(memberId).deployments.find(d => d.id === deployId);
+  if (deploy) { deploy[field] = el.textContent.trim(); saveState(); }
+}
+
+function updateDeployInputField(memberId, deployId, field, value) {
+  const deploy = getMemberData(memberId).deployments.find(d => d.id === deployId);
+  if (deploy) { deploy[field] = value; saveState(); }
+}
+
+function updateDeployCount(memberId, deployId, countType, value) {
+  const deploy = getMemberData(memberId).deployments.find(d => d.id === deployId);
+  if (deploy) {
+    if (!deploy.counts) deploy.counts = {};
+    deploy.counts[countType] = value !== '' ? Number(value) : '';
+    saveState();
+  }
+}
+
+function addRedmineItem(memberId, deployId) {
+  const deploy = getMemberData(memberId).deployments.find(d => d.id === deployId);
+  if (!deploy) return;
+  deploy.redmineItems.push({ id: generateId(), text: '' });
+  saveState();
+  renderMain();
+}
+
+function removeRedmineItem(memberId, deployId, itemId) {
+  const deploy = getMemberData(memberId).deployments.find(d => d.id === deployId);
+  if (!deploy) return;
+  deploy.redmineItems = deploy.redmineItems.filter(i => i.id !== itemId);
+  saveState();
+  renderMain();
+}
+
+function updateRedmineText(el) {
+  const { member: memberId, deployId, redmineId } = el.dataset;
+  const deploy = getMemberData(memberId).deployments.find(d => d.id === deployId);
+  if (!deploy) return;
+  const item = deploy.redmineItems.find(i => i.id === redmineId);
+  if (item) { item.text = el.textContent.trim(); saveState(); }
+}
+
+// ============================================================
+// EXCEL EXPORT
+// ============================================================
+async function exportToExcel() {
+  showToast('Excel 파일 생성 중...');
+  try {
+    const wb = new ExcelJS.Workbook();
+    // 팀 통합 시트 (첫 번째)
+    buildTeamSheet(wb.addWorksheet(state.meta.teamName));
+    // 개인 시트
+    for (const member of state.meta.members) {
+      const ws = wb.addWorksheet(member.name);
+      buildMemberSheet(ws, member.id);
+    }
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${state.meta.teamName}_주간업무보고_${state.meta.month}월_${state.meta.week}주차.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('✓ Excel 내보내기 완료!');
+  } catch (err) {
+    console.error('Excel export error:', err);
+    showToast('오류: ' + err.message);
+  }
+}
+
+// ============================================================
+// EXCEL SHEET BUILDER — 예시.xlsx 포맷 그대로
+// ============================================================
+function buildMemberSheet(ws, memberId) {
+  const member  = getMember(memberId);
+  const data    = getMemberData(memberId);
+
+  // ── 컬럼 너비 (예시.xlsx 그대로) ──
+  ws.getColumn(1).width = 9;         // A spacer
+  ws.getColumn(2).width = 28;        // B KPI/제품
+  ws.getColumn(3).width = 16.83;     // C 금주활동
+  ws.getColumn(4).width = 14;        // D 배포기한
+  ws.getColumn(5).width = 24.33;     // E
+  ws.getColumn(6).width = 15.83;     // F 차주계획
+  ws.getColumn(7).width = 34.25;     // G
+  ws.getColumn(8).width = 9;         // H spacer
+
+  // ── 포맷 상수 (예시.xlsx 추출값) ──
+  const HDR_FILL   = { type: 'pattern', pattern: 'solid', fgColor: { theme: 0, tint: -0.1499984740745262 }, bgColor: { indexed: 64 } };
+  const GRAY_FILL  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' }, bgColor: { indexed: 64 } };
+  const WHITE_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' }, bgColor: { indexed: 64 } };
+  const HDR_FONT   = { size: 10, name: 'GC120', color: { theme: 1 } };
+  const DATA_FONT  = { size: 10, name: 'GC120', color: { theme: 1 } };
+  const T = { style: 'thin', color: { indexed: 64 } }; // thin border
+
+  const FULL = { top: T, bottom: T, left: T, right: T };
+
+  // ── 전체 셀 흰색 배경 (헤더 셀은 이후에 덮어씀) ──
+  for (var wr = 1; wr <= 200; wr++) {
+    for (var wc = 1; wc <= 21; wc++) {
+      ws.getRow(wr).getCell(wc).fill = WHITE_FILL;
+    }
+  }
+
+  // ── Rows 1-3: 빈 행 (예시.xlsx와 동일하게 비워둠) ──
+
+  // ── Row 4: 주간보고 ──
+  ws.getRow(4).height = 30;
+  ws.mergeCells('B4:G4');
+  const h4 = ws.getCell('B4');
+  h4.value     = '주간보고';
+  h4.fill      = HDR_FILL;
+  h4.font      = HDR_FONT;
+  h4.alignment = { horizontal: 'center', vertical: 'middle' };
+  h4.border    = FULL;
+
+  // ── Row 5: 컬럼 헤더 ──
+  ws.getRow(5).height = 30;
+  ws.mergeCells('C5:E5');
+  ws.mergeCells('F5:G5');
+  function hdrCell(addr, text) {
+    const c = ws.getCell(addr);
+    c.value     = text;
+    c.fill      = HDR_FILL;
+    c.font      = HDR_FONT;
+    c.alignment = { horizontal: 'center', vertical: 'middle' };
+    c.border    = FULL;
+  }
+  hdrCell('B5', 'KPI/제품');
+  hdrCell('C5', '금주활동');
+  hdrCell('F5', '차주계획');
+
+  // ── 헬퍼 ──
+  function setVal(addr, val, opts) {
+    if (val === null || val === undefined || val === '') return;
+    var c = ws.getCell(addr);
+    c.value = val;
+    c.font  = DATA_FONT;
+    c.fill  = WHITE_FILL;
+    c.alignment = opts && opts.center
+      ? { horizontal: 'center', vertical: 'middle', wrapText: false }
+      : { vertical: 'top', wrapText: false };
+  }
+  // 빈 셀에도 흰 배경 + 기본 border 적용
+  function setEmpty(addr) {
+    var c = ws.getCell(addr);
+    c.fill = WHITE_FILL;
+  }
+
+  // B:G 각 컬럼 기본 left/right border (예시.xlsx 패턴)
+  // B: L+R, C: L only, D: none, E: none, F: L only, G: R only
+  var COL_BORDERS = {
+    2: { left: T, right: T },  // B
+    3: { left: T },            // C
+    4: {},                     // D
+    5: {},                     // E
+    6: { left: T },            // F
+    7: { right: T },           // G
+  };
+  function applyRowBorder(rowNum) {
+    for (var col = 2; col <= 7; col++) {
+      try {
+        var c = ws.getRow(rowNum).getCell(col);
+        var b = c.border ? JSON.parse(JSON.stringify(c.border)) : {};
+        var add = COL_BORDERS[col] || {};
+        if (add.left)  b.left  = T;
+        if (add.right) b.right = T;
+        c.border = b;
+      } catch(e) {}
+    }
+  }
+
+  // 과제 구분선: 해당 행 B:G 모두 top border
+  function applyTopSep(rowNum) {
+    for (var col = 2; col <= 7; col++) {
+      try {
+        var c = ws.getRow(rowNum).getCell(col);
+        var b = c.border ? JSON.parse(JSON.stringify(c.border)) : {};
+        b.top = T;
+        c.border = b;
+      } catch(e) {}
+    }
+  }
+
+  // 섹션 끝: B:G bottom border
+  function applyBottomSep(rowNum) {
+    for (var col = 2; col <= 7; col++) {
+      try {
+        var c = ws.getRow(rowNum).getCell(col);
+        var b = c.border ? JSON.parse(JSON.stringify(c.border)) : {};
+        b.bottom = T;
+        c.border = b;
+      } catch(e) {}
+    }
+  }
+
+  var row = 6;
+
+  // ── 과제 ──
+  for (var ti = 0; ti < data.tasks.length; ti++) {
+    var task     = data.tasks[ti];
+    var startRow = row;
+    var curItems = task.currentWeekItems || [];
+    var nxtItems = task.nextWeekItems    || [];
+    var issues   = task.issues           || [];
+
+    var dlPart = task.deadline
+      ? '(~' + task.deadline.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$2/$3') + ', ' + (task.overallProgress || 0) + '%)'
+      : '(' + (task.overallProgress || 0) + '%)';
+
+    setVal('B' + row,       task.kpiProduct || '', { center: true });
+    setVal('B' + (row + 1), dlPart,               { center: true });
+
+    // C열: 금주활동 + 상세 + 이슈
+    var cRow = row;
+    for (var ci = 0; ci < curItems.length; ci++) {
+      var item = curItems[ci];
+      if (!item.text) continue;
+      var line = ' - ' + item.text;
+      if (item.progress !== '' && item.progress != null) line += ' (' + item.progress + '%)';
+      setVal('C' + cRow, line); cRow++;
+      var dets = (item.details || []).filter(function(d) { return d.text; });
+      for (var di = 0; di < dets.length; di++) {
+        setVal('C' + cRow, '   ' + dets[di].text); cRow++;
+      }
+    }
+    if (issues.some(function(i) { return i.text; })) {
+      setVal('C' + cRow, ' ※ 이슈사항'); cRow++;
+      for (var ii = 0; ii < issues.length; ii++) {
+        if (issues[ii].text) { setVal('C' + cRow, '  - ' + issues[ii].text); cRow++; }
+      }
+    }
+    var cLast = Math.max(cRow - 1, row);
+
+    // F열: 차주계획 + 상세
+    var fRow = row;
+    for (var ni = 0; ni < nxtItems.length; ni++) {
+      var nitem = nxtItems[ni];
+      if (!nitem.text) continue;
+      var nline = ' - ' + nitem.text;
+      if (nitem.progress !== '' && nitem.progress != null) nline += ' (' + nitem.progress + '%)';
+      setVal('F' + fRow, nline); fRow++;
+      var ndets = (nitem.details || []).filter(function(d) { return d.text; });
+      for (var ndi = 0; ndi < ndets.length; ndi++) {
+        setVal('F' + fRow, '   ' + ndets[ndi].text); fRow++;
+      }
+    }
+    var fLast = Math.max(fRow - 1, row);
+
+    var maxRow = Math.max(row + 1, cLast, fLast);
+
+    // 모든 행에 L/R border
+    for (var r = startRow; r <= maxRow; r++) applyRowBorder(r);
+    // 과제 시작행 top border (구분선)
+    applyTopSep(startRow);
+
+    row = maxRow + 1;
+  }
+
+  // 마지막 과제 끝 bottom border
+  if (row > 6) applyBottomSep(row - 1);
+
+  // ── 운영/요청사항 ──
+  var ops    = data.operations || [];
+  var curOps = ops.filter(function(o) { return o.weekType !== 'next'; });
+  var nxtOps = ops.filter(function(o) { return o.weekType === 'next'; });
+  if (curOps.length > 0 || nxtOps.length > 0) {
+    var opsStart = row;
+    setVal('B' + row, '운영/요청 사항', { center: true });
+    var cOps = row, fOps = row;
+    for (var oi = 0; oi < curOps.length; oi++) {
+      if (curOps[oi].text) { setVal('C' + cOps, ' - ' + curOps[oi].text); cOps++; }
+    }
+    for (var ofi = 0; ofi < nxtOps.length; ofi++) {
+      if (nxtOps[ofi].text) { setVal('F' + fOps, ' - ' + nxtOps[ofi].text); fOps++; }
+    }
+    var opsMax = Math.max(cOps - 1, fOps - 1, row);
+    for (var r2 = opsStart; r2 <= opsMax; r2++) applyRowBorder(r2);
+    applyTopSep(opsStart);
+    applyBottomSep(opsMax);
+    row = opsMax + 1;
+  }
+
+  // ── 제품 배포 ──
+  var deploys = data.deployments || [];
+  if (deploys.length > 0) {
+    // 3행 빈 행
+    row += 3;
+
+    // 배포 헤더 (B:G merged, dark fill)
+    ws.getRow(row).height = 30;
+    ws.mergeCells('B' + row + ':G' + row);
+    var dh = ws.getCell('B' + row);
+    dh.value     = '제품 배포';
+    dh.fill      = HDR_FILL;
+    dh.font      = HDR_FONT;
+    dh.alignment = { horizontal: 'center', vertical: 'middle' };
+    dh.border    = FULL;
+    row++;
+
+    for (var di2 = 0; di2 < deploys.length; di2++) {
+      var dep = deploys[di2];
+      // 서브 헤더 (gray fill) — B~E + F:G merged 진척
+      ws.mergeCells('F' + row + ':G' + row);
+      var subHdrs = { B: '제품', C: '차수', D: '배포기한', E: '건수(기능/오류)', F: '진척' };
+      ['B','C','D','E','F'].forEach(function(col) {
+        var hc = ws.getCell(col + row);
+        hc.value     = subHdrs[col];
+        hc.fill      = GRAY_FILL;
+        hc.font      = DATA_FONT;
+        hc.alignment = { horizontal: 'center', vertical: 'middle' };
+        hc.border    = FULL;
+      });
+      row++;
+
+      // 데이터 행: B~E full border (bottom 포함), F top+left (no right, no bottom), G top+left+right (no bottom)
+      var feat = dep.counts ? (dep.counts.feature || 0) : 0;
+      var bug  = dep.counts ? (dep.counts.bug     || 0) : 0;
+      setVal('B' + row, dep.product    || '', { center: true });
+      setVal('C' + row, dep.round      || '', { center: true });
+      setVal('D' + row, dep.deployDate || '', { center: true });
+      setVal('E' + row, (feat + bug) + '(' + feat + '/' + bug + ')', { center: true });
+      setVal('F' + row, dep.progressText || '');
+      // B(2)~E(5): top+left+right+bottom / F(6): top+left / G(7): top+right (G에 left 없어야 F-G 경계선 없음)
+      var dataRowBorders = { 2:{top:T,left:T,right:T,bottom:T}, 3:{top:T,left:T,right:T,bottom:T},
+                             4:{top:T,left:T,right:T,bottom:T}, 5:{top:T,left:T,right:T,bottom:T},
+                             6:{top:T,left:T}, 7:{top:T,right:T} };
+      for (var col = 2; col <= 7; col++) {
+        try {
+          var dc = ws.getRow(row).getCell(col);
+          dc.border = dataRowBorders[col];
+          if (!dc.fill || !dc.fill.fgColor) dc.fill = WHITE_FILL;
+        } catch(e) {}
+      }
+      row++;
+
+      // 레드마인/이슈 행 border: B(left), C/D(없음), E(right), F(left), G(right) — 완전 덮어쓰기
+      function applySubRowBorder(rowNum) {
+        var subBorders = { 2: {left:T}, 3: {}, 4: {}, 5: {right:T}, 6: {left:T}, 7: {right:T} };
+        for (var sc = 2; sc <= 7; sc++) {
+          try {
+            var sbc = ws.getRow(rowNum).getCell(sc);
+            sbc.border = subBorders[sc] || {};
+          } catch(e) {}
+        }
+      }
+
+      // 레드마인 항목 — B셀부터
+      var rmItems = dep.redmineItems || [];
+      for (var ri = 0; ri < rmItems.length; ri++) {
+        if (rmItems[ri].text) {
+          setVal('B' + row, ' # ' + rmItems[ri].text);
+          applySubRowBorder(row);
+          row++;
+        }
+      }
+      // 이슈 — B셀부터
+      if (dep.issues) {
+        setVal('B' + row, ' ※ 이슈: ' + dep.issues);
+        applySubRowBorder(row);
+        row++;
+      }
+      applyBottomSep(row - 1);
+    }
+  }
+}
+
+// ============================================================
+// TEAM COLLECT (UI 취합 — Excel 아님)
+// ============================================================
+function collectTeam() {
+  showToast('✓ 취합 완료! 팀원 최신 내용으로 업데이트되었습니다.');
+  renderMain();
+}
+
+// ── 팀 통합 시트: 전 팀원 과제/운영/배포를 개인 시트 포맷 그대로 순서대로 출력 ──
+function buildTeamSheet(ws) {
+  // 컬럼 너비 (개인 시트 동일)
+  ws.getColumn(1).width = 9;
+  ws.getColumn(2).width = 28;
+  ws.getColumn(3).width = 16.83;
+  ws.getColumn(4).width = 14;
+  ws.getColumn(5).width = 24.33;
+  ws.getColumn(6).width = 15.83;
+  ws.getColumn(7).width = 34.25;
+  ws.getColumn(8).width = 9;
+
+  const HDR_FILL   = { type: 'pattern', pattern: 'solid', fgColor: { theme: 0, tint: -0.1499984740745262 }, bgColor: { indexed: 64 } };
+  const GRAY_FILL  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' }, bgColor: { indexed: 64 } };
+  const WHITE_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' }, bgColor: { indexed: 64 } };
+  const HDR_FONT   = { size: 10, name: 'GC120', color: { theme: 1 } };
+  const DATA_FONT  = { size: 10, name: 'GC120', color: { theme: 1 } };
+  const T = { style: 'thin', color: { indexed: 64 } };
+  const FULL = { top: T, bottom: T, left: T, right: T };
+
+  // 전체 셀 흰색 배경
+  for (var wr = 1; wr <= 500; wr++) {
+    for (var wc = 1; wc <= 21; wc++) {
+      ws.getRow(wr).getCell(wc).fill = WHITE_FILL;
+    }
+  }
+
+  // Row 4: 주간보고
+  ws.getRow(4).height = 30;
+  ws.mergeCells('B4:G4');
+  var h4 = ws.getCell('B4');
+  h4.value = '주간보고';
+  h4.fill = HDR_FILL; h4.font = HDR_FONT;
+  h4.alignment = { horizontal: 'center', vertical: 'middle' };
+  h4.border = FULL;
+
+  // Row 5: 컬럼 헤더
+  ws.getRow(5).height = 30;
+  ws.mergeCells('C5:E5');
+  ws.mergeCells('F5:G5');
+  function hdrCell(addr, text) {
+    var c = ws.getCell(addr);
+    c.value = text; c.fill = HDR_FILL; c.font = HDR_FONT;
+    c.alignment = { horizontal: 'center', vertical: 'middle' };
+    c.border = FULL;
+  }
+  hdrCell('B5', 'KPI/제품');
+  hdrCell('C5', '금주활동');
+  hdrCell('F5', '차주계획');
+
+  function setVal(addr, val, opts) {
+    if (val === null || val === undefined || val === '') return;
+    var c = ws.getCell(addr);
+    c.value = val; c.font = DATA_FONT; c.fill = WHITE_FILL;
+    c.alignment = opts && opts.center
+      ? { horizontal: 'center', vertical: 'middle', wrapText: false }
+      : { vertical: 'top', wrapText: false };
+  }
+  var COL_BORDERS = { 2:{left:T,right:T}, 3:{left:T}, 4:{}, 5:{}, 6:{left:T}, 7:{right:T} };
+  function applyRowBorder(rowNum) {
+    for (var col = 2; col <= 7; col++) {
+      try {
+        var c = ws.getRow(rowNum).getCell(col);
+        var b = c.border ? JSON.parse(JSON.stringify(c.border)) : {};
+        var add = COL_BORDERS[col] || {};
+        if (add.left)  b.left  = T;
+        if (add.right) b.right = T;
+        c.border = b;
+      } catch(e) {}
+    }
+  }
+  function applyTopSep(rowNum) {
+    for (var col = 2; col <= 7; col++) {
+      try {
+        var c = ws.getRow(rowNum).getCell(col);
+        var b = c.border ? JSON.parse(JSON.stringify(c.border)) : {};
+        b.top = T; c.border = b;
+      } catch(e) {}
+    }
+  }
+  function applyBottomSep(rowNum) {
+    for (var col = 2; col <= 7; col++) {
+      try {
+        var c = ws.getRow(rowNum).getCell(col);
+        var b = c.border ? JSON.parse(JSON.stringify(c.border)) : {};
+        b.bottom = T; c.border = b;
+      } catch(e) {}
+    }
+  }
+  function applySubRowBorder(rowNum) {
+    var subBorders = { 2:{left:T}, 3:{}, 4:{}, 5:{right:T}, 6:{left:T}, 7:{right:T} };
+    for (var sc = 2; sc <= 7; sc++) {
+      try {
+        var sbc = ws.getRow(rowNum).getCell(sc);
+        sbc.border = subBorders[sc] || {};
+      } catch(e) {}
+    }
+  }
+
+  var row = 6;
+  var hasAnyTask = false;
+
+  // ── 모든 팀원 과제 ──
+  for (var mi = 0; mi < state.meta.members.length; mi++) {
+    var data = getMemberData(state.meta.members[mi].id);
+    for (var ti = 0; ti < data.tasks.length; ti++) {
+      hasAnyTask = true;
+      var task = data.tasks[ti];
+      var startRow = row;
+      var curItems = task.currentWeekItems || [];
+      var nxtItems = task.nextWeekItems    || [];
+      var issues   = task.issues           || [];
+
+      var dlPart = task.deadline
+        ? '(~' + task.deadline.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$2/$3') + ', ' + (task.overallProgress || 0) + '%)'
+        : '(' + (task.overallProgress || 0) + '%)';
+
+      setVal('B' + row, task.kpiProduct || '', { center: true });
+      setVal('B' + (row + 1), dlPart, { center: true });
+
+      var cRow = row;
+      for (var ci = 0; ci < curItems.length; ci++) {
+        var item = curItems[ci];
+        if (!item.text) continue;
+        var line = ' - ' + item.text;
+        if (item.progress !== '' && item.progress != null) line += ' (' + item.progress + '%)';
+        setVal('C' + cRow, line); cRow++;
+        var dets = (item.details || []).filter(function(d) { return d.text; });
+        for (var di = 0; di < dets.length; di++) {
+          setVal('C' + cRow, '   ' + dets[di].text); cRow++;
+        }
+      }
+      if (issues.some(function(i) { return i.text; })) {
+        setVal('C' + cRow, ' ※ 이슈사항'); cRow++;
+        for (var ii = 0; ii < issues.length; ii++) {
+          if (issues[ii].text) { setVal('C' + cRow, '  - ' + issues[ii].text); cRow++; }
+        }
+      }
+      var cLast = Math.max(cRow - 1, row);
+
+      var fRow = row;
+      for (var ni = 0; ni < nxtItems.length; ni++) {
+        var nitem = nxtItems[ni];
+        if (!nitem.text) continue;
+        var nline = ' - ' + nitem.text;
+        if (nitem.progress !== '' && nitem.progress != null) nline += ' (' + nitem.progress + '%)';
+        setVal('F' + fRow, nline); fRow++;
+        var ndets = (nitem.details || []).filter(function(d) { return d.text; });
+        for (var ndi = 0; ndi < ndets.length; ndi++) {
+          setVal('F' + fRow, '   ' + ndets[ndi].text); fRow++;
+        }
+      }
+      var fLast = Math.max(fRow - 1, row);
+      var maxRow = Math.max(row + 1, cLast, fLast);
+
+      for (var r = startRow; r <= maxRow; r++) applyRowBorder(r);
+      applyTopSep(startRow);
+      row = maxRow + 1;
+    }
+  }
+  if (hasAnyTask) applyBottomSep(row - 1);
+
+  // ── 모든 팀원 운영/요청사항 취합 ──
+  var allCurOps = [], allNxtOps = [];
+  for (var mo = 0; mo < state.meta.members.length; mo++) {
+    var opsData = getMemberData(state.meta.members[mo].id).operations || [];
+    allCurOps = allCurOps.concat(opsData.filter(function(o) { return o.weekType !== 'next'; }));
+    allNxtOps = allNxtOps.concat(opsData.filter(function(o) { return o.weekType === 'next'; }));
+  }
+  if (allCurOps.length > 0 || allNxtOps.length > 0) {
+    var opsStart = row;
+    setVal('B' + row, '운영/요청 사항', { center: true });
+    var cOps = row, fOps = row;
+    for (var oi = 0; oi < allCurOps.length; oi++) {
+      if (allCurOps[oi].text) { setVal('C' + cOps, ' - ' + allCurOps[oi].text); cOps++; }
+    }
+    for (var ofi = 0; ofi < allNxtOps.length; ofi++) {
+      if (allNxtOps[ofi].text) { setVal('F' + fOps, ' - ' + allNxtOps[ofi].text); fOps++; }
+    }
+    var opsMax = Math.max(cOps - 1, fOps - 1, row);
+    for (var r2 = opsStart; r2 <= opsMax; r2++) applyRowBorder(r2);
+    applyTopSep(opsStart);
+    applyBottomSep(opsMax);
+    row = opsMax + 1;
+  }
+
+  // ── 모든 팀원 배포 ──
+  var allDeploys = [];
+  for (var md = 0; md < state.meta.members.length; md++) {
+    allDeploys = allDeploys.concat(getMemberData(state.meta.members[md].id).deployments || []);
+  }
+  if (allDeploys.length > 0) {
+    row += 3;
+    ws.getRow(row).height = 30;
+    ws.mergeCells('B' + row + ':G' + row);
+    var dh = ws.getCell('B' + row);
+    dh.value = '제품 배포';
+    dh.fill = HDR_FILL; dh.font = HDR_FONT;
+    dh.alignment = { horizontal: 'center', vertical: 'middle' };
+    dh.border = FULL;
+    row++;
+
+    for (var di2 = 0; di2 < allDeploys.length; di2++) {
+      var dep = allDeploys[di2];
+      ws.mergeCells('F' + row + ':G' + row);
+      var subHdrs = { B:'제품', C:'차수', D:'배포기한', E:'건수(기능/오류)', F:'진척' };
+      ['B','C','D','E','F'].forEach(function(col) {
+        var hc = ws.getCell(col + row);
+        hc.value = subHdrs[col]; hc.fill = GRAY_FILL; hc.font = DATA_FONT;
+        hc.alignment = { horizontal: 'center', vertical: 'middle' };
+        hc.border = FULL;
+      });
+      row++;
+      var feat = dep.counts ? (dep.counts.feature || 0) : 0;
+      var bug  = dep.counts ? (dep.counts.bug     || 0) : 0;
+      setVal('B' + row, dep.product    || '', { center: true });
+      setVal('C' + row, dep.round      || '', { center: true });
+      setVal('D' + row, dep.deployDate || '', { center: true });
+      setVal('E' + row, (feat + bug) + '(' + feat + '/' + bug + ')', { center: true });
+      setVal('F' + row, dep.progressText || '');
+      var drborders = { 2:{top:T,left:T,right:T,bottom:T}, 3:{top:T,left:T,right:T,bottom:T},
+                        4:{top:T,left:T,right:T,bottom:T}, 5:{top:T,left:T,right:T,bottom:T},
+                        6:{top:T,left:T}, 7:{top:T,right:T} };
+      for (var col = 2; col <= 7; col++) {
+        try { ws.getRow(row).getCell(col).border = drborders[col]; } catch(e) {}
+      }
+      row++;
+      var rmItems = dep.redmineItems || [];
+      for (var ri = 0; ri < rmItems.length; ri++) {
+        if (rmItems[ri].text) {
+          setVal('B' + row, ' # ' + rmItems[ri].text);
+          applySubRowBorder(row); row++;
+        }
+      }
+      if (dep.issues) {
+        setVal('B' + row, ' ※ 이슈: ' + dep.issues);
+        applySubRowBorder(row); row++;
+      }
+      applyBottomSep(row - 1);
+    }
+  }
+}
+
+// ============================================================
+// TEAM VIEW
+// ============================================================
+function getMemberAvgProgress(memberId) {
+  const tasks = getMemberData(memberId).tasks || [];
+  if (!tasks.length) return null;
+  const sum = tasks.reduce((a, t) => a + (t.overallProgress || 0), 0);
+  return Math.round(sum / tasks.length);
+}
+
+function getTeamCounts() {
+  let totalTasks = 0, issueTasks = 0, totalDeploys = 0;
+  for (const m of state.meta.members) {
+    const d = getMemberData(m.id);
+    totalTasks  += (d.tasks || []).length;
+    issueTasks  += (d.tasks || []).filter(t => (t.issues || []).some(i => i.text)).length;
+    totalDeploys += (d.deployments || []).length;
+  }
+  return { totalTasks, issueTasks, totalDeploys };
+}
+
+function renderTeamSummaryMetrics() {
+  const rows = state.meta.members.map(m => {
+    const pct = getMemberAvgProgress(m.id);
+    const display = pct === null ? '—' : pct + '%';
+    const bar = pct === null ? '<div class="team-progress-bg"></div>' :
+      `<div class="team-progress-bg"><div class="team-progress-fill" style="width:${pct}%"></div></div>`;
+    return `<div class="team-member-progress">
+      <span class="team-member-name">${esc(m.name)}</span>
+      ${bar}
+      <span class="team-progress-pct">${display}</span>
+    </div>`;
+  }).join('');
+  return `<div class="team-progress-list">${rows}</div>`;
+}
+
+function renderTeamCountCards() {
+  const { totalTasks, issueTasks, totalDeploys } = getTeamCounts();
+  return `<div class="team-count-cards">
+    <div class="team-count-card">
+      <span class="team-count-label">전체 과제</span>
+      <span class="team-count-num">${totalTasks}</span>
+    </div>
+    <div class="team-count-card warn">
+      <span class="team-count-label">이슈 과제</span>
+      <span class="team-count-num">${issueTasks}</span>
+    </div>
+    <div class="team-count-card">
+      <span class="team-count-label">배포 건수</span>
+      <span class="team-count-num">${totalDeploys}</span>
+    </div>
+  </div>`;
+}
+
+function renderTeamCardView() {
+  const cards = state.meta.members.map(m => {
+    const data = getMemberData(m.id);
+    const pct = getMemberAvgProgress(m.id);
+    const issueCount = (data.tasks || []).filter(t => (t.issues || []).some(i => i.text)).length;
+    const taskRows = (data.tasks || []).length
+      ? (data.tasks || []).map(t =>
+          `<div class="team-card-task">
+            <span class="team-card-kpi">${esc(t.kpiProduct || '(미입력)')}</span>
+            <span class="team-card-pct">${t.overallProgress || 0}%</span>
+          </div>`).join('')
+      : '<div class="team-card-empty">과제 없음</div>';
+
+    const collapsed = _teamCardCollapsed.has(m.id);
+    return `<div class="team-card${collapsed ? ' collapsed' : ''}" data-member="${m.id}">
+      <div class="team-card-header" onclick="toggleTeamCard('${m.id}')">
+        <span class="team-card-name" onclick="event.stopPropagation();switchTab('${m.id}')">${esc(m.name)}</span>
+        <span class="team-card-division">${esc(m.division || '')}</span>
+        ${issueCount > 0 ? `<span class="team-card-issue-badge">⚠ ${issueCount}</span>` : ''}
+        <svg class="team-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="team-card-body">
+        <div class="team-card-tasks">${taskRows}</div>
+        ${pct !== null ? `
+          <div class="team-card-footer">
+            <div class="team-progress-bg" style="flex:1"><div class="team-progress-fill" style="width:${pct}%"></div></div>
+            <span class="team-progress-pct">${pct}%</span>
+          </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="team-card-grid">${cards}</div>`;
+}
+
+function renderTeamTableView() {
+  const rows = [];
+  for (const m of state.meta.members) {
+    const data = getMemberData(m.id);
+    const tasks = data.tasks || [];
+    if (!tasks.length) {
+      rows.push(`<tr class="team-table-row">
+        <td class="team-td-member">${esc(m.name)}</td>
+        <td colspan="5" style="color:var(--text-muted);font-size:13px;padding:10px 14px;">과제 없음</td>
+      </tr>`);
+      continue;
+    }
+    tasks.forEach((t, ti) => {
+      function renderActivityCell(items) {
+        return (items || []).filter(i => i.text).map(i => {
+          const details = (i.details || []).filter(d => d.text);
+          const detailHtml = details.length
+            ? '<ul class="team-detail-list">' + details.map(d => `<li>${esc(d.text)}</li>`).join('') + '</ul>'
+            : '';
+          return `<div style="margin-bottom:${details.length?'6':'0'}px">• ${esc(i.text)}${detailHtml}</div>`;
+        }).join('');
+      }
+      const issueText = (t.issues || []).filter(i => i.text).map(i => i.text).join('\n');
+      rows.push(`<tr class="team-table-row${issueText ? ' has-issue' : ''}">
+        ${ti === 0 ? `<td class="team-td-member" rowspan="${tasks.length}">${esc(m.name)}</td>` : ''}
+        <td class="team-td team-td-kpi" style="display:flex;align-items:center;gap:4px;">
+          <span contenteditable="true"
+            data-member="${m.id}" data-task="${t.id}" data-field="kpiProduct"
+            onblur="updateTaskCEField(this);renderMain();"
+            style="flex:1;min-width:0;">${esc(t.kpiProduct || '')}</span>
+          <button class="fav-btn${isFav('task',m.id,t.id)?' active':''}"
+            onclick="toggleFav('task','${m.id}','${t.id}')" title="즐겨찾기">★</button>
+        </td>
+        <td class="team-td team-td-activity">${renderActivityCell(t.currentWeekItems)}</td>
+        <td class="team-td team-td-activity">${renderActivityCell(t.nextWeekItems)}</td>
+        <td class="team-td team-td-pct">
+          <input type="number" class="team-pct-input" min="0" max="100"
+                 value="${t.overallProgress || 0}"
+                 onchange="updateTaskField('${m.id}','${t.id}','overallProgress',+this.value);renderMain();">
+        </td>
+        <td class="team-td team-td-issue${issueText ? ' issue-cell' : ''}">${esc(issueText)}</td>
+      </tr>`);
+    });
+  }
+  return `<div class="team-table-wrap">
+    <table class="team-table">
+      <thead><tr>
+        <th>담당자</th><th>KPI / 제품</th><th>금주활동</th>
+        <th>차주계획</th><th>진척율</th><th>이슈</th>
+      </tr></thead>
+      <tbody>${rows.join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+function renderTeamDeploySection() {
+  const rows = [];
+  for (const m of state.meta.members) {
+    const deploys = getMemberData(m.id).deployments || [];
+    if (!deploys.length) continue;
+    deploys.forEach((dep, di) => {
+      const feat = dep.counts ? (dep.counts.feature || 0) : 0;
+      const bug  = dep.counts ? (dep.counts.bug || 0) : 0;
+      const rmHtml = (dep.redmineItems || []).filter(r => r.text)
+        .map(r => `<div style="white-space:nowrap;">• ${esc(r.text)}</div>`).join('');
+      rows.push(`<tr class="team-table-row">
+        ${di === 0 ? `<td class="team-td-member" rowspan="${deploys.length}">${esc(m.name)}</td>` : ''}
+        <td class="team-td" style="white-space:nowrap;">
+          ${esc(dep.product || '')}
+          <button class="fav-btn${isFav('deploy',m.id,dep.id)?' active':''}"
+            onclick="toggleFav('deploy','${m.id}','${dep.id}')" title="즐겨찾기">★</button>
+        </td>
+        <td class="team-td">${esc(dep.round || '')}</td>
+        <td class="team-td">${esc(dep.deployDate || '')}</td>
+        <td class="team-td" style="text-align:center;">${feat + bug}(${feat}/${bug})</td>
+        <td class="team-td">${esc(dep.progressText || '')}</td>
+        <td class="team-td" style="font-size:12px;">${rmHtml}</td>
+        <td class="team-td" style="font-size:12px;">${esc(dep.issues || '')}</td>
+      </tr>`);
+    });
+  }
+  if (!rows.length) return '';
+  return `<div class="section" style="margin-top:20px;">
+    <div class="section-header">
+      <span class="section-title">제품 배포</span>
+    </div>
+    <div class="team-table-wrap">
+      <table class="team-table">
+        <thead><tr>
+          <th>담당자</th><th>제품</th><th>차수</th><th>배포기한</th><th style="text-align:center;">건수(기능/오류)</th><th>진척</th><th>레드마인</th><th>이슈</th>
+        </tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderTeamOperationsSection() {
+  const rows = [];
+  for (const m of state.meta.members) {
+    const ops = (getMemberData(m.id).operations || []).filter(o => o.text);
+    if (!ops.length) continue;
+    ops.forEach((op, oi) => {
+      const isCurrent = op.weekType !== 'next';
+      rows.push(`<tr class="team-table-row">
+        ${oi === 0 ? `<td class="team-td-member" rowspan="${ops.length}">${esc(m.name)}</td>` : ''}
+        <td class="team-td" style="text-align:center;white-space:nowrap;">
+          <span class="op-type-badge ${isCurrent ? 'current' : 'next'}">${isCurrent ? '금주' : '차주'}</span>
+        </td>
+        <td class="team-td">${esc(op.text)}</td>
+      </tr>`);
+    });
+  }
+  if (!rows.length) return '';
+  return `<div class="team-ops-section section">
+    <div class="section-header"><span class="section-title">운영 / 요청사항</span></div>
+    <div class="team-table-wrap team-ops-table">
+      <table class="team-table">
+        <thead><tr>
+          <th>담당자</th><th style="width:72px;text-align:center;">구분</th><th>내용</th>
+        </tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function toggleTeamViewMode(mode) {
+  state.teamViewMode = mode;
+  saveState();
+  renderMain();
+}
+
+// ============================================================
+// FAVORITES
+// ============================================================
+function favKey(type, memberId, id) { return `${type}|${memberId}|${id}`; }
+function isFav(type, memberId, id) {
+  return (state.favorites || []).some(f => f.type === type && f.memberId === memberId && f.id === id);
+}
+function toggleFav(type, memberId, id) {
+  if (!state.favorites) state.favorites = [];
+  const idx = state.favorites.findIndex(f => f.type === type && f.memberId === memberId && f.id === id);
+  if (idx >= 0) state.favorites.splice(idx, 1);
+  else state.favorites.push({ type, memberId, id });
+  saveState();
+  renderMain();
+}
+function removeFav(type, memberId, id) {
+  if (!state.favorites) return;
+  state.favorites = state.favorites.filter(f => !(f.type === type && f.memberId === memberId && f.id === id));
+  _favExpanded.delete(`${type}|${memberId}|${id}`);
+  saveState();
+  renderMain();
+}
+
+const _favExpanded = new Set();
+function toggleFavDetail(type, memberId, id) {
+  const k = `${type}|${memberId}|${id}`;
+  if (_favExpanded.has(k)) _favExpanded.delete(k);
+  else _favExpanded.add(k);
+  const detail = document.querySelector(`.fav-card[data-fav="${k}"] .fav-card-detail`);
+  const btn    = document.querySelector(`.fav-card[data-fav="${k}"] .fav-card-toggle`);
+  if (detail) detail.classList.toggle('open', _favExpanded.has(k));
+  if (btn)    btn.textContent = _favExpanded.has(k) ? '접기 ▲' : '펼치기 ▼';
+}
+
+function renderFavCards() {
+  if (!state.favorites || !state.favorites.length) return '';
+  const cards = state.favorites.map(f => {
+    const k = `${f.type}|${f.memberId}|${f.id}`;
+    const member = getMember(f.memberId);
+    const mName = member ? esc(member.name) : '';
+    const isOpen = _favExpanded.has(k);
+    const actions = `
+      <div class="fav-card-actions">
+        <button class="fav-card-toggle" onclick="toggleFavDetail('${f.type}','${f.memberId}','${f.id}')">${isOpen ? '접기 ▲' : '펼치기 ▼'}</button>
+        <button class="fav-card-remove" onclick="removeFav('${f.type}','${f.memberId}','${f.id}')" title="즐겨찾기 해제">✕</button>
+      </div>`;
+
+    if (f.type === 'task') {
+      const task = (getMemberData(f.memberId).tasks || []).find(t => t.id === f.id);
+      if (!task) return '';
+      const pct = task.overallProgress || 0;
+      const currentItems = (task.currentWeekItems || []).filter(i => i.text);
+      const nextItems    = (task.nextWeekItems    || []).filter(i => i.text);
+      const issues       = (task.issues           || []).filter(i => i.text);
+      const mkList = items => items.length
+        ? `<ul class="fav-detail-list">${items.map(i => `<li>${esc(i.text)}</li>`).join('')}</ul>`
+        : `<span class="fav-detail-empty">없음</span>`;
+      return `<div class="fav-card" data-fav="${k}">
+        <div class="fav-card-header">
+          <div class="fav-card-header-left">
+            <div class="fav-card-type">KPI / 제품</div>
+            <div class="fav-card-title" title="${esc(task.kpiProduct || '')}">${esc(task.kpiProduct || '(미입력)')}</div>
+          </div>
+          ${actions}
+        </div>
+        <div class="fav-card-meta">${mName} · ~${esc(task.deadline || '-')}</div>
+        <div class="fav-card-bar">
+          <div class="team-progress-bg" style="flex:1"><div class="team-progress-fill" style="width:${pct}%"></div></div>
+          <span class="team-progress-pct">${pct}%</span>
+        </div>
+        <div class="fav-card-detail${isOpen ? ' open' : ''}">
+          <div class="fav-detail-section">
+            <div class="fav-detail-label">금주활동</div>${mkList(currentItems)}
+          </div>
+          <div class="fav-detail-section">
+            <div class="fav-detail-label">차주계획</div>${mkList(nextItems)}
+          </div>
+          ${issues.length ? `<div class="fav-detail-section">
+            <div class="fav-detail-label">이슈</div>${mkList(issues)}
+          </div>` : ''}
+        </div>
+      </div>`;
+    } else if (f.type === 'deploy') {
+      const dep = (getMemberData(f.memberId).deployments || []).find(d => d.id === f.id);
+      if (!dep) return '';
+      const feat = dep.counts ? (dep.counts.feature || 0) : 0;
+      const bug  = dep.counts ? (dep.counts.bug  || 0) : 0;
+      const rmItems = (dep.redmineItems || []).filter(r => r.text);
+      const mkList = items => items.length
+        ? `<ul class="fav-detail-list">${items.map(i => `<li>${esc(i.text)}</li>`).join('')}</ul>`
+        : `<span class="fav-detail-empty">없음</span>`;
+      return `<div class="fav-card" data-fav="${k}">
+        <div class="fav-card-header">
+          <div class="fav-card-header-left">
+            <div class="fav-card-type">제품 배포</div>
+            <div class="fav-card-title" title="${esc(dep.product || '')}">${esc(dep.product || '(미입력)')} ${esc(dep.round || '')}</div>
+          </div>
+          ${actions}
+        </div>
+        <div class="fav-card-meta">${mName} · ${esc(dep.deployDate || '-')} · ${feat+bug}건(${feat}/${bug})</div>
+        <div class="fav-card-bar" style="font-size:12px;color:var(--text-secondary);">
+          ${esc(dep.progressText || '—')}
+        </div>
+        <div class="fav-card-detail${isOpen ? ' open' : ''}">
+          <div class="fav-detail-section">
+            <div class="fav-detail-label">레드마인</div>${mkList(rmItems)}
+          </div>
+          ${dep.issues ? `<div class="fav-detail-section">
+            <div class="fav-detail-label">이슈</div>
+            <div class="fav-detail-list" style="padding-left:0;">${esc(dep.issues)}</div>
+          </div>` : ''}
+        </div>
+      </div>`;
+    }
+    return '';
+  }).filter(Boolean).join('');
+  if (!cards) return '';
+  return `<div class="fav-cards">${cards}</div>`;
+}
+
+let _teamSummaryCollapsed = false;
+function toggleTeamSummary() {
+  _teamSummaryCollapsed = !_teamSummaryCollapsed;
+  const el = document.querySelector('.team-summary');
+  if (el) el.classList.toggle('collapsed', _teamSummaryCollapsed);
+}
+
+const _teamCardCollapsed = new Set();
+function toggleTeamCard(memberId) {
+  if (_teamCardCollapsed.has(memberId)) _teamCardCollapsed.delete(memberId);
+  else _teamCardCollapsed.add(memberId);
+  const card = document.querySelector(`.team-card[data-member="${memberId}"]`);
+  if (card) card.classList.toggle('collapsed', _teamCardCollapsed.has(memberId));
+}
+
+function renderTeamView() {
+  const mode = state.teamViewMode || 'card';
+  const content = mode === 'card' ? renderTeamCardView() : renderTeamTableView();
+  const doneCount = state.meta.members.filter(m => (state.members[m.id] || {}).updatedAt != null).length;
+  const total = state.meta.members.length;
+  const allDone = doneCount === total;
+  return `<div class="team-view">
+    <div class="member-header">
+      <h1>${esc(state.meta.teamName)}</h1>
+      <span class="period-tag">· ${periodText()} 주간보고</span>
+      <div class="member-status-bar">
+        <!--<span class="team-done-count${allDone ? ' all-done' : ''}">${doneCount}/${total} 완료</span>-->
+        <!--<button class="status-btn status-done-btn" onclick="collectTeam()">취합하기</button>-->
+      </div>
+    </div>
+    <div class="team-summary${_teamSummaryCollapsed ? ' collapsed' : ''}">
+      <div class="team-summary-header" onclick="toggleTeamSummary()">
+        <span class="team-summary-title">진척 현황</span>
+        <svg class="team-summary-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="team-summary-body">
+        ${renderTeamSummaryMetrics()}
+        ${renderTeamCountCards()}
+      </div>
+    </div>
+    ${renderFavCards()}
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">팀원 현황</span>
+        <div class="team-view-toggle">
+          <button class="team-toggle-btn ${mode === 'table' ? 'active' : ''}" onclick="toggleTeamViewMode('table')">테이블</button>
+          <button class="team-toggle-btn ${mode === 'card' ? 'active' : ''}" onclick="toggleTeamViewMode('card')">카드</button>
+        </div>
+      </div>
+      ${content}
+    </div>
+    ${renderTeamOperationsSection()}
+    ${renderTeamDeploySection()}
+  </div>`;
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+const NOTIF_KEY  = 'weekly_notifications';
+const NOTIF_MAX  = 50;
+const NOTIF_SHOW = 20;
+
+let _notifications = [];
+
+function loadNotifications() {
+  try {
+    _notifications = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+  } catch(e) {
+    _notifications = [];
+  }
+}
+
+function saveNotifications() {
+  localStorage.setItem(NOTIF_KEY, JSON.stringify(_notifications));
+}
+
+const NOTIF_ICONS = {
+  task_add:       '📋',
+  task_delete:    '🗑',
+  status_done:    '✅',
+  status_editing: '✏️',
+  ai_edit:        '🤖',
+};
+
+function pushNotification(type, memberId, memberName, extraLabel) {
+  const labels = {
+    task_add:       `${memberName} · 과제 추가${extraLabel ? ': ' + extraLabel : ''}`,
+    task_delete:    `${memberName} · 과제 삭제${extraLabel ? ': ' + extraLabel : ''}`,
+    status_done:    `${memberName} → 작성완료`,
+    status_editing: `${memberName} → 수정 중`,
+    ai_edit:        `AI · ${memberName} · ${extraLabel || '수정'}`,
+  };
+  const notif = {
+    id:         generateId(),
+    type,
+    memberId,
+    memberName,
+    message:    labels[type] || type,
+    createdAt:  Date.now(),
+    read:       false,
+  };
+  _notifications.unshift(notif);
+  if (_notifications.length > NOTIF_MAX) _notifications = _notifications.slice(0, NOTIF_MAX);
+  saveNotifications();
+  updateNotifBadge();
+}
+
+function updateNotifBadge() {
+  const badge = document.getElementById('notifBadge');
+  if (!badge) return;
+  const count = _notifications.filter(n => !n.read).length;
+  badge.textContent = count > 0 ? (count > 9 ? '9+' : count) : '';
+  badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+function markAllRead() {
+  _notifications.forEach(n => n.read = true);
+  saveNotifications();
+  updateNotifBadge();
+}
+
+function formatRelativeTime(ts) {
+  const diff = Date.now() - ts;
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days  = Math.floor(diff / 86400000);
+  if (diff < 60000)   return '방금 전';
+  if (mins  < 60)     return `${mins}분 전`;
+  if (hours < 24)     return `${hours}시간 전`;
+  return `${days}일 전`;
+}
+
+function renderNotificationBell() {
+  const count = _notifications.filter(n => !n.read).length;
+  const badge = count > 0
+    ? `<span id="notifBadge" class="notif-badge" style="display:flex">${count > 9 ? '9+' : count}</span>`
+    : `<span id="notifBadge" class="notif-badge" style="display:none"></span>`;
+  return `
+    <div class="notif-wrap">
+      <button class="notif-bell-btn" onclick="toggleNotificationPanel(event)" title="알림">
+        🔔${badge}
+      </button>
+    </div>`;
+}
+
+function renderNotificationPanel() {
+  const panel = document.getElementById('notifPanel');
+  if (!panel) return;
+  const items = _notifications.slice(0, NOTIF_SHOW);
+  const unreadCount = _notifications.filter(n => !n.read).length;
+
+  const itemsHtml = items.length === 0
+    ? '<div class="notif-empty">최근 알림 없음</div>'
+    : items.map(n => `
+        <div class="notif-item${n.read ? '' : ' unread'}">
+          <span class="notif-item-icon">${NOTIF_ICONS[n.type] || '🔔'}</span>
+          <div class="notif-item-body">
+            <div class="notif-item-msg">${esc(n.message)}</div>
+            <div class="notif-item-time">${formatRelativeTime(n.createdAt)}</div>
+          </div>
+          ${n.read ? '' : '<div class="notif-new-dot"></div>'}
+        </div>`).join('');
+
+  panel.innerHTML = `
+    <div class="notif-panel-header">
+      <span>알림${unreadCount > 0 ? ` (${unreadCount})` : ''}</span>
+      ${unreadCount > 0 ? '<button class="notif-mark-read-btn" onclick="closeNotifPanel()">모두 읽음</button>' : ''}
+    </div>
+    <div class="notif-list">${itemsHtml}</div>`;
+}
+
+let _notifOpen = false;
+
+function toggleNotificationPanel(e) {
+  e.stopPropagation();
+  _notifOpen ? closeNotifPanel() : openNotifPanel();
+}
+
+function openNotifPanel() {
+  const panel = document.getElementById('notifPanel');
+  if (!panel) return;
+  renderNotificationPanel();
+  panel.classList.add('open');
+  _notifOpen = true;
+}
+
+function closeNotifPanel() {
+  const panel = document.getElementById('notifPanel');
+  if (!panel) return;
+  panel.classList.remove('open');
+  _notifOpen = false;
+  // 패널 닫힐 때 모두 읽음 처리
+  markAllRead();
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let _toastTimer = null;
+// ============================================================
+// LANDING PAGE
+// ============================================================
+function applyNukki(imgEl) {
+  /* Canvas로 흰 배경 제거 (누끼) */
+  try {
+    const c = document.createElement('canvas');
+    c.width  = imgEl.naturalWidth  || imgEl.width;
+    c.height = imgEl.naturalHeight || imgEl.height;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(imgEl, 0, 0);
+    const id = ctx.getImageData(0, 0, c.width, c.height);
+    const d  = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+      /* 흰색에 가까운 픽셀(R>235, G>235, B>235) → 투명 처리 */
+      if (d[i] > 235 && d[i+1] > 235 && d[i+2] > 235) {
+        const brightness = (d[i] + d[i+1] + d[i+2]) / 3;
+        d[i+3] = Math.round(Math.max(0, (255 - brightness) * 1.8));
+      }
+    }
+    ctx.putImageData(id, 0, 0);
+    imgEl.src = c.toDataURL('image/png');
+    imgEl.closest('.landing-logo-wrap')?.classList.add('nukki-done');
+  } catch(e) {
+    /* 보안 정책으로 canvas 접근 불가 시 fallback — 스타일 유지 */
+    console.log('[nukki] fallback (canvas tainted):', e.message);
+  }
+}
+
+function showLanding() {
+  const el = document.createElement('div');
+  el.className = 'landing-overlay';
+  el.id = 'landingOverlay';
+  el.innerHTML = `
+    <div class="landing-bg-orb landing-bg-orb-1"></div>
+    <div class="landing-bg-orb landing-bg-orb-2"></div>
+    <div class="landing-bg-orb landing-bg-orb-3"></div>
+    <div class="landing-bg-orb landing-bg-orb-4"></div>
+    <div class="landing-card">
+      <div class="landing-logo-wrap">
+        <img src="img/0.GCMediAI.png" class="landing-logo-img" alt="GC MediAI"
+             onload="applyNukki(this)" />
+      </div>
+      <h1 class="landing-title">Weekly Report</h1>
+      <input id="landingTeamInput" class="landing-input" type="text"
+        placeholder="팀 이름" maxlength="24"
+        onkeydown="if(event.key==='Enter') confirmLanding()" />
+      <button class="landing-btn" onclick="confirmLanding()">
+        <span>Get Started</span>
+        <svg class="landing-btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => document.getElementById('landingTeamInput')?.focus(), 150);
+}
+
+function confirmLanding() {
+  const input = document.getElementById('landingTeamInput');
+  const name = (input?.value || '').trim();
+  if (!name) {
+    input?.classList.remove('shake');
+    void input?.offsetWidth; // reflow
+    input?.classList.add('shake');
+    return;
+  }
+  state.meta.teamName = name;
+  saveState();
+  localStorage.setItem(LAST_VISIT_KEY, String(Date.now()));
+  const overlay = document.getElementById('landingOverlay');
+  overlay.classList.add('closing');
+  setTimeout(() => {
+    overlay.remove();
+    state.activeTab = '__team__';
+    saveState();
+    renderSidebar();
+    renderMain();
+  }, 450);
+}
+
+function showTaskPopup(title, sub) {
+  const existing = document.querySelector('.task-popup');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'task-popup';
+  el.innerHTML =
+    '<span class="task-popup-icon">✦</span>' +
+    '<span class="task-popup-text">' + esc(title) +
+      (sub ? '<span class="task-popup-sub">' + esc(sub) + '</span>' : '') +
+    '</span>';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  clearTimeout(_toastTimer);
+
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  _toastTimer = setTimeout(() => el.remove(), 2800);
+}
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    saveState();
+    showToast('✓ 저장되었습니다');
+  }
+});
+
+
+// ============================================================
+// ADD MEMBER
+// ============================================================
+function showAddMemberModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'addMemberModal';
+  overlay.innerHTML = '<div class="modal-box">' +
+    '<div class="modal-title">새 팀원 추가</div>' +
+    '<div class="modal-field"><label>이름</label>' +
+    '<input type="text" id="newMemberName" placeholder="홍길동" maxlength="20"></div>' +
+    '<div class="modal-actions">' +
+    '<button class="modal-cancel-btn" onclick="closeAddMemberModal()">취소</button>' +
+    '<button class="modal-confirm-btn" onclick="confirmAddMember()">추가</button>' +
+    '</div></div>';
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeAddMemberModal(); });
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => document.getElementById('newMemberName')?.focus());
+  document.getElementById('newMemberName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmAddMember();
+    if (e.key === 'Escape') closeAddMemberModal();
+  });
+}
+
+function closeAddMemberModal() {
+  const el = document.getElementById('addMemberModal');
+  if (el) el.remove();
+}
+
+function confirmAddMember() {
+  const name = (document.getElementById('newMemberName')?.value || '').trim();
+  const division = '기타';
+  if (!name) { document.getElementById('newMemberName')?.focus(); return; }
+  if (state.meta.members.some(m => m.name === name)) {
+    showToast('이미 있는 팀원 이름입니다.');
+    return;
+  }
+  const id = name.replace(/\s+/g, '_') + '_' + Date.now().toString(36);
+  state.meta.members.push({ id, name, division });
+  state.members[id] = getEmptyMemberData();
+  state.activeTab = id;
+  saveState();
+  closeAddMemberModal();
+  renderSidebar();
+  renderMain();
+  showToast('✓ ' + name + ' 팀원이 추가되었습니다.');
+}
+
+function removeMember(id, event) {
+  event.stopPropagation();
+  const member = getMember(id);
+  if (!member) return;
+  if (!confirm(member.name + ' 팀원을 삭제하시겠습니까? 데이터도 함께 삭제됩니다.')) return;
+  state.meta.members = state.meta.members.filter(function(m) { return m.id !== id; });
+  delete state.members[id];
+  if (state.activeTab === id) {
+    state.activeTab = state.meta.members[0] ? state.meta.members[0].id : '';
+  }
+  saveState();
+  renderSidebar();
+  renderMain();
+  showToast(member.name + ' 팀원이 삭제되었습니다.');
+}
+
+
+// ============================================================
+// RESET
+// ============================================================
+function resetMemberData(memberId) {
+  const member = state.meta.members.find(m => m.id === memberId);
+  if (!member) return;
+  if (!confirm(`${member.name}님의 데이터를 초기화하시겠습니까?\n(과제, 운영/요청, 배포 내용이 모두 삭제됩니다)`)) return;
+  state.members[memberId] = getEmptyMemberData();
+  saveState();
+  renderSidebar();
+  renderMain();
+  showToast(`✓ ${member.name}님의 데이터가 초기화되었습니다.`);
+}
+
+function resetAllData() {
+  if (!confirm('모든 팀원의 데이터를 초기화하시겠습니까?\n팀원 목록은 유지됩니다.')) return;
+  const savedMembers = state.meta.members.slice();
+  state = getDefaultState();
+  state.meta.members = savedMembers;
+  state.activeTab = savedMembers[0] ? savedMembers[0].id : state.activeTab;
+  state.members = {};
+  for (const m of savedMembers) { state.members[m.id] = getEmptyMemberData(); }
+  saveState();
+  renderSidebar();
+  renderMain();
+  showToast('✓ 전체 데이터가 초기화되었습니다. (팀원 목록 유지)');
+}
+
+// ============================================================
+// CHAT PANEL
+// ============================================================
+let _chatOpen = false;
+
+function toggleChat() { _chatOpen ? closeChat() : openChat(); }
+
+function openChat() {
+  _chatOpen = true;
+  document.getElementById('chatPanel').classList.add('open');
+  document.getElementById('chatFab').classList.add('hidden');
+  if (!state.chatMessages) state.chatMessages = [];
+  if (state.chatMessages.length === 0) {
+    const memberList = state.meta.members.map(m => m.name).join(', ');
+    state.chatMessages.push({
+      role: 'assistant',
+      content: `안녕하세요! 전략개발팀 주간업무보고 어시스턴트입니다 🙂\n\n현재 ${state.meta.year}년 ${state.meta.month}월 ${state.meta.week}주차 보고 데이터를 갖고 있어요.\n\n팀원: ${memberList}\n\n어떤 팀원의 내용을 도와드릴까요?`,
+      tools: null,
+    });
+    saveState();
+  }
+  renderChatMessages();
+}
+
+function closeChat() {
+  _chatOpen = false;
+  document.getElementById('chatPanel').classList.remove('open');
+  document.getElementById('chatFab').classList.remove('hidden');
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+}
+
+// buildChatContext: 팀 데이터 → 마크다운 텍스트
+function buildChatContext() {
+  const lines = [];
+  for (const m of state.meta.members) {
+    const data = getMemberData(m.id);
+    lines.push(`[${m.name}] (ID: ${m.id})`);
+    if (!data.tasks.length) {
+      lines.push('과제: (없음)');
+    } else {
+      data.tasks.forEach((t, ti) => {
+        const dl = t.deadline ? `, ~${t.deadline}` : '';
+        lines.push(`과제 ${ti + 1}: "${t.kpiProduct || '(미입력)'}" (ID: ${t.id}, 진척 ${t.overallProgress || 0}%${dl})`);
+        const cur = (t.currentWeekItems || []).filter(i => i.text);
+        lines.push('  금주활동:' + (cur.length ? '' : ' (없음)'));
+        cur.forEach(i => {
+          lines.push(`    - ${i.text}${i.progress != null && i.progress !== '' ? ` (${i.progress}%)` : ''} (ID: ${i.id})`);
+          (i.details || []).filter(d => d.text).forEach(d => lines.push(`      · ${d.text} (ID: ${d.id})`));
+        });
+        const nxt = (t.nextWeekItems || []).filter(i => i.text);
+        lines.push('  차주계획:' + (nxt.length ? '' : ' (없음)'));
+        nxt.forEach(i => {
+          lines.push(`    - ${i.text}${i.progress != null && i.progress !== '' ? ` (${i.progress}%)` : ''} (ID: ${i.id})`);
+          (i.details || []).filter(d => d.text).forEach(d => lines.push(`      · ${d.text} (ID: ${d.id})`));
+        });
+        const iss = (t.issues || []).filter(i => i.text);
+        lines.push('  이슈:' + (iss.length ? '' : ' (없음)'));
+        iss.forEach(i => lines.push(`    - ${i.text} (ID: ${i.id})`));
+      });
+    }
+    const ops = (data.operations || []).filter(o => o.text);
+    lines.push('운영/요청:' + (ops.length ? '' : ' (없음)'));
+    ops.forEach(o => lines.push(`  - [${o.weekType === 'next' ? '차주' : '금주'}] ${o.text} (ID: ${o.id})`));
+    const deps = (data.deployments || []).filter(d => d.product);
+    if (deps.length) {
+      lines.push('배포:');
+      deps.forEach(d => {
+        const feat = d.counts ? (d.counts.feature || 0) : 0;
+        const bug  = d.counts ? (d.counts.bug     || 0) : 0;
+        lines.push(`  - ${d.product} ${d.round || ''} ~${d.deployDate || '미정'} 기능:${feat}/오류:${bug} ${d.progressText || ''} (ID: ${d.id})`);
+        if (d.issues) lines.push(`    이슈: ${d.issues}`);
+      });
+    }
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
+// ── Tool 정의 배열 ──
+function getChatTools() {
+  return [
+    {
+      name: 'add_activity',
+      description: '팀원의 특정 과제에 금주활동(current) 또는 차주계획(next) 항목을 추가합니다',
+      input_schema: { type: 'object', required: ['memberId','taskId','weekType','text'],
+        properties: {
+          memberId: { type: 'string', description: '팀원 ID' },
+          taskId:   { type: 'string', description: '과제 ID' },
+          weekType: { type: 'string', enum: ['current','next'] },
+          text:     { type: 'string', description: '활동 내용' },
+          progress: { type: 'number', description: '진척률 0-100 (선택)' },
+        }},
+    },
+    {
+      name: 'update_activity',
+      description: '팀원의 기존 활동 항목을 수정합니다. itemId는 context의 (ID: ...) 값을 그대로 복사하세요.',
+      input_schema: { type: 'object', required: ['memberId','taskId','weekType','itemId'],
+        properties: {
+          memberId:     { type: 'string' }, taskId: { type: 'string' },
+          weekType:     { type: 'string', enum: ['current','next'] },
+          itemId:       { type: 'string', description: '활동 항목 ID — context의 (ID: ...) 값 그대로 복사' },
+          text:         { type: 'string' }, progress: { type: 'number' },
+          originalText: { type: 'string', description: '수정 전 항목 텍스트 (ID로 찾을 수 없을 때 fallback)' },
+        }},
+    },
+    {
+      name: 'update_task_meta',
+      description: '과제의 KPI/제품명, 마감일, 전체 진척률을 수정합니다',
+      input_schema: { type: 'object', required: ['memberId','taskId'],
+        properties: {
+          memberId:        { type: 'string' }, taskId: { type: 'string' },
+          kpiProduct:      { type: 'string' },
+          deadline:        { type: 'string', description: 'YYYY-MM-DD' },
+          overallProgress: { type: 'number' },
+        }},
+    },
+    {
+      name: 'add_issue',
+      description: '팀원의 특정 과제에 이슈 항목을 추가합니다',
+      input_schema: { type: 'object', required: ['memberId','taskId','text'],
+        properties: {
+          memberId: { type: 'string' }, taskId: { type: 'string' }, text: { type: 'string' },
+        }},
+    },
+    {
+      name: 'add_operation',
+      description: '팀원의 운영/요청사항을 추가합니다',
+      input_schema: { type: 'object', required: ['memberId','text','weekType'],
+        properties: {
+          memberId: { type: 'string' }, text: { type: 'string' },
+          weekType: { type: 'string', enum: ['current','next'] },
+        }},
+    },
+    {
+      name: 'add_detail',
+      description: '활동 항목의 상세내용(하위 세부 항목)을 추가합니다. 기존 활동 항목 아래 들여쓰기된 세부 내용을 추가할 때 사용하세요. 상위 활동 항목(itemId)이 이미 존재해야 합니다. add_activity와 혼동하지 마세요 — 새 항목 추가는 add_activity, 기존 항목의 세부내용 추가는 add_detail입니다.',
+      input_schema: { type: 'object', required: ['memberId','taskId','weekType','itemId','text'],
+        properties: {
+          memberId: { type: 'string', description: '팀원 ID' },
+          taskId:   { type: 'string', description: '과제 ID' },
+          weekType: { type: 'string', enum: ['current','next'] },
+          itemId:   { type: 'string', description: '상위 활동 항목 ID' },
+          text:     { type: 'string', description: '상세 내용' },
+        }},
+    },
+    {
+      name: 'update_operation',
+      description: '팀원의 운영/요청사항 항목의 텍스트를 수정합니다',
+      input_schema: { type: 'object', required: ['memberId','operationId','text'],
+        properties: {
+          memberId:    { type: 'string', description: '팀원 ID' },
+          operationId: { type: 'string', description: '운영/요청사항 항목 ID' },
+          text:        { type: 'string', description: '새 내용' },
+          weekType:    { type: 'string', enum: ['current','next'], description: '금주/차주 변경 (선택)' },
+        }},
+    },
+    {
+      name: 'add_deployment',
+      description: '팀원에게 새 제품 배포 항목을 추가합니다.',
+      input_schema: { type: 'object', required: ['memberId','product'],
+        properties: {
+          memberId:     { type: 'string', description: '팀원 ID' },
+          product:      { type: 'string', description: '제품명' },
+          round:        { type: 'string', description: '차수 (예: 1차)' },
+          deployDate:   { type: 'string', description: '배포기한 YYYY-MM-DD' },
+          progressText: { type: 'string', description: '진척 내용' },
+          featureCount: { type: 'number', description: '기능 건수' },
+          bugCount:     { type: 'number', description: '오류 건수' },
+          issues:       { type: 'string', description: '배포 이슈' },
+        }},
+    },
+    {
+      name: 'update_deployment',
+      description: '팀원의 기존 제품 배포 항목을 수정합니다. 제품명, 차수, 배포기한, 진척 텍스트, 기능/오류 건수, 이슈를 수정할 수 있습니다.',
+      input_schema: { type: 'object', required: ['memberId','deploymentId'],
+        properties: {
+          memberId:     { type: 'string', description: '팀원 ID' },
+          deploymentId: { type: 'string', description: '배포 항목 ID' },
+          product:      { type: 'string', description: '제품명' },
+          round:        { type: 'string', description: '차수 (예: 1차, 2차)' },
+          deployDate:   { type: 'string', description: '배포기한 YYYY-MM-DD' },
+          progressText: { type: 'string', description: '진척 내용 텍스트' },
+          featureCount: { type: 'number', description: '기능 건수' },
+          bugCount:     { type: 'number', description: '오류 건수' },
+          issues:       { type: 'string', description: '배포 이슈 내용' },
+        }},
+    },
+    {
+      name: 'delete_activity',
+      description: '팀원의 금주활동 또는 차주계획 항목을 삭제합니다. itemId는 context의 (ID: ...) 값을 그대로 복사하세요.',
+      input_schema: { type: 'object', required: ['memberId','taskId','weekType','itemId'],
+        properties: {
+          memberId: { type: 'string' }, taskId: { type: 'string' },
+          weekType: { type: 'string', enum: ['current','next'] },
+          itemId:   { type: 'string', description: '삭제할 활동 항목 ID — context의 (ID: ...) 값 그대로 복사' },
+          itemText: { type: 'string', description: '삭제할 항목 텍스트 (ID로 찾을 수 없을 때 fallback)' },
+        }},
+    },
+    {
+      name: 'delete_issue',
+      description: '팀원의 과제 이슈 항목을 삭제합니다. issueId는 context의 (ID: ...) 값을 그대로 복사하세요.',
+      input_schema: { type: 'object', required: ['memberId','taskId','issueId'],
+        properties: {
+          memberId:  { type: 'string' }, taskId: { type: 'string' },
+          issueId:   { type: 'string', description: '삭제할 이슈 ID — context의 (ID: ...) 값 그대로 복사' },
+          issueText: { type: 'string', description: '삭제할 이슈 텍스트 (ID로 찾을 수 없을 때 fallback)' },
+        }},
+    },
+    {
+      name: 'delete_operation',
+      description: '팀원의 운영/요청사항 항목을 삭제합니다.',
+      input_schema: { type: 'object', required: ['memberId','operationId'],
+        properties: {
+          memberId:    { type: 'string' },
+          operationId: { type: 'string', description: '삭제할 운영/요청사항 ID' },
+        }},
+    },
+    {
+      name: 'delete_deployment',
+      description: '팀원의 제품 배포 항목을 삭제합니다.',
+      input_schema: { type: 'object', required: ['memberId','deploymentId'],
+        properties: {
+          memberId:     { type: 'string' },
+          deploymentId: { type: 'string', description: '삭제할 배포 항목 ID — context의 (ID: ...) 값을 그대로 복사하세요' },
+          product:      { type: 'string', description: '제품명 (ID 불확실 시 보조 식별자)' },
+        }},
+    },
+    {
+      name: 'add_task',
+      description: '팀원에게 새 과제(KPI/제품)를 추가합니다. 과제명(kpiProduct)은 반드시 확인 후 호출하세요. 사용자가 큰따옴표로 과제명을 명시한 경우 즉시 호출하세요.',
+      input_schema: { type: 'object', required: ['memberId','kpiProduct'],
+        properties: {
+          memberId:        { type: 'string', description: '팀원 ID' },
+          kpiProduct:      { type: 'string', description: 'KPI/제품명' },
+          division:        { type: 'string', description: '사업부문 (선택)' },
+          deadline:        { type: 'string', description: '마감일 YYYY-MM-DD (선택)' },
+          overallProgress: { type: 'number', description: '전체 진척률 0-100 (선택, 기본 0)' },
+        }},
+    },
+    {
+      name: 'delete_task',
+      description: '팀원의 과제(KPI/제품)를 삭제합니다. taskId는 context의 (ID: ...) 값을 그대로 복사하세요.',
+      input_schema: { type: 'object', required: ['memberId','taskId'],
+        properties: {
+          memberId:   { type: 'string', description: '팀원 ID' },
+          taskId:     { type: 'string', description: '삭제할 과제 ID — context의 (ID: ...) 값 그대로 복사' },
+          kpiProduct: { type: 'string', description: '과제명 (ID 불확실 시 보조 식별자)' },
+        }},
+    },
+    {
+      name: 'delete_detail',
+      description: '활동 항목의 상세내용(하위 세부 항목)을 삭제합니다. detailId는 context의 (ID: ...) 값을 그대로 복사하세요.',
+      input_schema: { type: 'object', required: ['memberId','taskId','weekType','itemId','detailId'],
+        properties: {
+          memberId:     { type: 'string', description: '팀원 ID' },
+          taskId:       { type: 'string', description: '과제 ID' },
+          weekType:     { type: 'string', enum: ['current','next'] },
+          itemId:       { type: 'string', description: '상위 활동 항목 ID' },
+          detailId:     { type: 'string', description: '삭제할 상세 항목 ID — context의 (ID: ...) 값 그대로 복사' },
+          originalText: { type: 'string', description: '삭제할 상세 내용 텍스트 (ID로 찾을 수 없을 때 fallback)' },
+        }},
+    },
+    {
+      name: 'update_detail',
+      description: '활동 항목의 상세내용(하위 세부 항목)을 수정합니다. detailId는 context의 (ID: ...) 값을 그대로 복사하세요. 사용자가 큰따옴표로 새 내용을 명시한 경우 즉시 호출하세요.',
+      input_schema: { type: 'object', required: ['memberId','taskId','weekType','itemId','detailId','text'],
+        properties: {
+          memberId:     { type: 'string', description: '팀원 ID' },
+          taskId:       { type: 'string', description: '과제 ID' },
+          weekType:     { type: 'string', enum: ['current','next'] },
+          itemId:       { type: 'string', description: '상위 활동 항목 ID' },
+          detailId:     { type: 'string', description: '수정할 상세 항목 ID — context의 (ID: ...) 값 그대로 복사' },
+          text:         { type: 'string', description: '새 상세 내용' },
+          originalText: { type: 'string', description: '수정 전 상세 내용 텍스트 (ID로 찾을 수 없을 때 fallback)' },
+        }},
+    },
+  ];
+}
+
+// ── 메시지 전송 ──
+async function sendChatMessage() {
+  const key = window.CLAUDE_API_KEY;
+  if (!key || key.startsWith('sk-ant-여기에')) {
+    _appendErrorMsg('config.js에 CLAUDE_API_KEY를 입력해 주세요.');
+    return;
+  }
+
+  const ta = document.getElementById('chatTextarea');
+  const text = ta.value.trim();
+  if (!text) return;
+  ta.value = '';
+
+  if (!state.chatMessages) state.chatMessages = [];
+  state.chatMessages.push({ role: 'user', content: text });
+  _trimChatHistory();
+  saveState();
+  renderChatMessages();
+  _trySwitchTabByName(text);
+
+  const btn = document.getElementById('chatSendBtn');
+  btn.disabled = true; btn.style.opacity = '0.4';
+  _appendLoadingMsg();
+
+  try {
+    const systemPrompt =
+      `당신은 전략개발팀 주간업무보고 어시스턴트입니다.\n` +
+      `현재 보고기간: ${state.meta.year}년 ${state.meta.month}월 ${state.meta.week}주차\n\n` +
+      `아래는 팀 전체 데이터입니다:\n${buildChatContext()}\n\n` +
+      `[tool 사용 규칙]\n` +
+      `- 추가/수정/삭제 요청 시 필요한 정보가 context와 사용자 메시지에서 모두 파악되면 즉시 tool을 호출하세요. 설명·요약·확인 텍스트를 먼저 출력하지 마세요.\n` +
+      `- 정보가 부족하면 tool 호출 전에 먼저 질문하세요. 빈 값으로 tool을 호출하지 마세요.\n` +
+      `- 단, 위 데이터에 이미 존재하는 정보(과제 ID, 항목 ID, 팀원 ID 등)는 사용자에게 재확인하지 말고 context에서 직접 찾아 사용하세요.\n` +
+      `- add_deployment: 제품명은 반드시 확인. 차수/기한/진척은 모르면 빈 문자열.\n` +
+      `- add_activity / add_detail / add_operation: 큰따옴표로 내용이 명시된 경우 즉시 tool을 호출하세요. progress 등 선택 항목이 없으면 묻지 말고 빈 값으로 진행하세요.\n` +
+      `- add_task: kpiProduct가 큰따옴표로 명시된 경우 즉시 tool을 호출하세요. deadline 등 선택 항목은 정보가 없으면 빈 값(또는 0)으로 진행하고 묻지 마세요.\n` +
+      `- update_task_meta / update_activity / update_operation: 변경할 내용이 사용자 메시지에 명시된 경우 확인 없이 즉시 tool을 호출하세요. memberId·taskId·itemId 등 ID는 context에서 직접 찾아 사용하세요. 재확인 질문 금지.\n` +
+      `- update_activity: itemId는 context의 (ID: ...) 값 그대로 복사. originalText에도 현재 항목 텍스트를 함께 전달하세요 (fallback 용도).\n` +
+      `- 삭제: context에서 ID로 특정 가능하면 확인 없이 즉시 tool을 호출하세요. 별도 확인 질문 금지.\n` +
+      `- delete_activity: itemId는 context (ID: ...) 값 그대로 복사. itemText에도 삭제할 항목 텍스트를 함께 전달하세요 (fallback 용도).\n` +
+      `- delete_issue: issueId는 context (ID: ...) 값 그대로 복사. issueText에도 삭제할 이슈 텍스트를 함께 전달하세요 (fallback 용도).\n` +
+      `- add_deployment는 deploymentId 없이 새로 만드는 tool이므로 ID 없다는 이유로 거절하지 마세요.\n` +
+      `[tool 목록]\n` +
+      `add_activity | update_activity | add_detail | update_detail | update_task_meta | add_issue\n` +
+      `add_operation | update_operation | add_deployment | update_deployment\n` +
+      `delete_activity | delete_detail | delete_issue | delete_operation | delete_deployment\n` +
+      `add_task | delete_task`;
+
+    // API 메시지 구성: user로 시작, 빈 content 제거
+    const apiMessages = state.chatMessages
+      .filter(m => m.content && m.content.trim())   // 빈 content 제거 (tool-only 응답 등)
+      .filter((m, i, arr) => {                       // user로 시작하도록 앞쪽 assistant 제거
+        const firstUser = arr.findIndex(x => x.role === 'user');
+        return i >= firstUser;
+      })
+      .map(m => ({ role: m.role, content: m.content }));
+
+    console.log('[chat] sending', apiMessages.length, 'messages, chatMessages total:', state.chatMessages.length);
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: systemPrompt,
+        tools: getChatTools(),
+        messages: apiMessages,
+      }),
+    });
+
+    _removeLoadingMsg();
+
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      const errMsg = res.status === 401
+        ? 'API Key가 올바르지 않습니다.'
+        : `요청 실패 (${res.status}): ${errJson.error?.message || ''}`;
+      _appendErrorMsg(errMsg);
+      return;
+    }
+
+    const json = await res.json();
+    console.log('[chat] API response:', JSON.stringify(json).slice(0, 500));
+    const textContent = (json.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
+    const toolBlocks  = (json.content || []).filter(b => b.type === 'tool_use');
+
+    state.chatMessages.push({
+      role: 'assistant',
+      content: textContent,
+      tools: toolBlocks.map(b => { console.log('[chat] tool call:', b.name, JSON.stringify(b.input)); return { id: b.id, name: b.name, input: b.input, status: 'pending' }; }) || [],
+    });
+    _trimChatHistory();
+    try { saveState(); } catch(se) { console.error('[chat] saveState error:', se); }
+    renderChatMessages();
+
+  } catch (err) {
+    console.error('[chat] fetch/parse error:', err);
+    _removeLoadingMsg();
+    _appendErrorMsg('네트워크 오류. 다시 시도해 주세요.');
+  } finally {
+    btn.disabled = false; btn.style.opacity = '';
+  }
+}
+
+function _trySwitchTabByName(text) {
+  const match = state.meta.members.find(m => text.includes(m.name));
+  if (match && state.activeTab !== match.id) {
+    switchTab(match.id);
+  }
+}
+
+function _trimChatHistory() {
+  if (!state.chatMessages) return;
+  while (state.chatMessages.length > 20) state.chatMessages.splice(0, 2);
+}
+
+// ── 렌더링 ──
+function renderChatMessages() {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+  if (!state.chatMessages) state.chatMessages = [];
+
+  console.log('[chat] rendering', state.chatMessages.length, 'messages');
+  const rendered = state.chatMessages.map((msg, idx) => {
+    try {
+      if (msg.role === 'user') {
+        return `<div class="chat-msg user">${esc(msg.content || '')}</div>`;
+      }
+      let html = '';
+      if (msg.content) {
+        html += `<div class="chat-msg assistant">${esc(msg.content).replace(/\n/g, '<br>')}</div>`;
+      }
+      (msg.tools || []).forEach((tool, ti) => {
+        try {
+          html += _renderToolCard(idx, ti, tool);
+        } catch(e) {
+          console.error('[chat] _renderToolCard error:', e, tool);
+          html += `<div class="chat-tool-card" style="color:red">렌더링 오류: ${e.message}</div>`;
+        }
+      });
+      return html;
+    } catch(e) {
+      console.error('[chat] renderChatMessages msg error:', e, msg);
+      return '';
+    }
+  });
+  console.log('[chat] rendered html length:', rendered.join('').length, '| last item:', rendered[rendered.length-1]?.slice(0,100));
+  container.innerHTML = rendered.join('');
+  const lastEl = container.lastElementChild;
+  if (lastEl) lastEl.scrollIntoView({ block: 'end', behavior: 'auto' });
+  setTimeout(() => {
+    const last2 = container.lastElementChild;
+    if (last2) last2.scrollIntoView({ block: 'end', behavior: 'auto' });
+  }, 80);
+}
+
+function _renderToolCard(msgIdx, toolIdx, tool) {
+  const desc = _describeToolUse(tool.name, tool.input);
+  const descHtml = `<div class="chat-tool-desc">${esc(desc).replace(/\n/g, '<br>')}</div>`;
+  if (tool.status === 'applied') {
+    return `<div class="chat-tool-card applied">
+      <div class="chat-tool-header">✓ 적용됨</div>
+      ${descHtml}
+    </div>`;
+  }
+  if (tool.status === 'cancelled') {
+    return `<div class="chat-tool-card cancelled">
+      <div class="chat-tool-header">✕ 취소됨</div>
+      ${descHtml}
+    </div>`;
+  }
+  return `<div class="chat-tool-card">
+    <div class="chat-tool-header">💡 AI 제안</div>
+    ${descHtml}
+    <div class="chat-tool-actions">
+      <button class="chat-tool-apply-btn" onclick="applyTool(${msgIdx},${toolIdx})">적용</button>
+      <button class="chat-tool-cancel-btn" onclick="cancelTool(${msgIdx},${toolIdx})">취소</button>
+    </div>
+  </div>`;
+}
+
+function _describeToolUse(name, inp) {
+  inp = Object.assign({}, inp, { memberId: _resolveMemberId(inp.memberId) });
+  const mname = (getMember(inp.memberId) || {}).name || inp.memberId;
+  const mdata = state.members[inp.memberId];
+  const task  = mdata ? mdata.tasks.find(t => t.id === inp.taskId) : null;
+  const tname = task ? (task.kpiProduct || '(과제)') : inp.taskId;
+  switch (name) {
+    case 'add_activity': {
+      const wt = inp.weekType === 'current' ? '금주활동' : '차주계획';
+      return `${mname} › ${tname} › ${wt} 추가:\n"${inp.text}"${inp.progress != null ? ` (${inp.progress}%)` : ''}`;
+    }
+    case 'update_activity': {
+      const wt = inp.weekType === 'current' ? '금주활동' : '차주계획';
+      const parts = [];
+      if (inp.text) parts.push(`내용: "${inp.text}"`);
+      if (inp.progress != null) parts.push(`진척: ${inp.progress}%`);
+      return `${mname} › ${tname} › ${wt} 수정:\n${parts.join(', ')}`;
+    }
+    case 'update_task_meta': {
+      const ch = [];
+      if (inp.kpiProduct) ch.push(`KPI: "${inp.kpiProduct}"`);
+      if (inp.deadline) ch.push(`마감: ${inp.deadline}`);
+      if (inp.overallProgress != null) ch.push(`진척: ${inp.overallProgress}%`);
+      return `${mname} › ${tname} › 메타 수정:\n${ch.join(', ')}`;
+    }
+    case 'add_issue':     return `${mname} › ${tname} › 이슈 추가:\n"${inp.text}"`;
+    case 'add_operation': {
+      const wt = inp.weekType === 'current' ? '금주' : '차주';
+      return `${mname} › 운영/요청 추가 [${wt}]:\n"${inp.text}"`;
+    }
+    case 'add_detail': {
+      const wt2 = inp.weekType === 'current' ? '금주활동' : '차주계획';
+      return `${mname} › ${tname} › ${wt2} 상세내용 추가:\n"${inp.text}"`;
+    }
+    case 'add_deployment': {
+      const parts = [];
+      if (inp.round)        parts.push(inp.round);
+      if (inp.deployDate)   parts.push(`~${inp.deployDate}`);
+      if (inp.progressText) parts.push(inp.progressText);
+      return `${mname} › 배포 추가:\n${inp.product}${parts.length ? ' ' + parts.join(' ') : ''}`;
+    }
+    case 'update_operation': {
+      const op = mdata ? (mdata.operations || []).find(o => o.id === inp.operationId) : null;
+      const orig = op ? `"${op.text}"` : inp.operationId;
+      return `${mname} › 운영/요청 수정:\n${orig} → "${inp.text}"`;
+    }
+    case 'update_deployment': {
+      const dep = mdata ? (mdata.deployments || []).find(d => d.id === inp.deploymentId) : null;
+      const dname = dep ? (dep.product || '(배포)') : inp.deploymentId;
+      const parts = [];
+      if (inp.product)   parts.push(`제품: "${inp.product}"`);
+      if (inp.round)     parts.push(`차수: ${inp.round}`);
+      if (inp.deployDate) parts.push(`기한: ${inp.deployDate}`);
+      if (inp.progressText) parts.push(`진척: "${inp.progressText}"`);
+      if (inp.featureCount != null) parts.push(`기능: ${inp.featureCount}건`);
+      if (inp.bugCount    != null) parts.push(`오류: ${inp.bugCount}건`);
+      if (inp.issues)    parts.push(`이슈: "${inp.issues}"`);
+      return `${mname} › 배포 수정 [${dname}]:\n${parts.join(', ')}`;
+    }
+    case 'delete_activity': {
+      const wt = inp.weekType === 'current' ? '금주활동' : '차주계획';
+      const task2 = mdata ? mdata.tasks.find(t => t.id === inp.taskId) : null;
+      const arr2 = task2 ? (inp.weekType === 'current' ? task2.currentWeekItems : task2.nextWeekItems) : [];
+      const item2 = arr2.find(i => i.id === inp.itemId);
+      return `${mname} › ${tname} › ${wt} 삭제:\n"${item2 ? item2.text : inp.itemId}"`;
+    }
+    case 'delete_issue': {
+      const task3 = mdata ? mdata.tasks.find(t => t.id === inp.taskId) : null;
+      const iss = task3 ? (task3.issues || []).find(i => i.id === inp.issueId) : null;
+      return `${mname} › ${tname} › 이슈 삭제:\n"${iss ? iss.text : inp.issueId}"`;
+    }
+    case 'delete_operation': {
+      const op2 = mdata ? (mdata.operations || []).find(o => o.id === inp.operationId) : null;
+      return `${mname} › 운영/요청 삭제:\n"${op2 ? op2.text : inp.operationId}"`;
+    }
+    case 'delete_deployment': {
+      const dep2 = mdata ? (mdata.deployments || []).find(d => d.id === inp.deploymentId) : null;
+      return `${mname} › 배포 삭제:\n"${dep2 ? dep2.product : inp.deploymentId}"`;
+    }
+    case 'add_task': {
+      const parts = [];
+      if (inp.deadline) parts.push(`마감: ${inp.deadline}`);
+      if (inp.overallProgress != null) parts.push(`진척: ${inp.overallProgress}%`);
+      return `${mname} › 과제 추가:\n"${inp.kpiProduct}"${parts.length ? ' ' + parts.join(' ') : ''}`;
+    }
+    case 'delete_task': {
+      const toDelTask = mdata ? (mdata.tasks.find(t => t.id === inp.taskId) || (inp.kpiProduct ? mdata.tasks.find(t => t.kpiProduct === inp.kpiProduct) : null)) : null;
+      const delName = toDelTask ? (toDelTask.kpiProduct || inp.taskId) : (inp.kpiProduct || inp.taskId);
+      return `${mname} › 과제 삭제:\n"${delName}"`;
+    }
+    case 'delete_detail': {
+      const wt3 = inp.weekType === 'current' ? '금주활동' : '차주계획';
+      const task5 = mdata ? mdata.tasks.find(t => t.id === inp.taskId) : null;
+      const arr5 = task5 ? (inp.weekType === 'current' ? task5.currentWeekItems : task5.nextWeekItems) : [];
+      const item5 = (arr5 || []).find(i => i.id === inp.itemId);
+      const detail5 = item5 ? (item5.details || []).find(d => d.id === inp.detailId) : null;
+      return `${mname} › ${tname} › ${wt3} 상세내용 삭제:\n"${detail5 ? detail5.text : inp.detailId}"`;
+    }
+    case 'update_detail': {
+      const wt4 = inp.weekType === 'current' ? '금주활동' : '차주계획';
+      return `${mname} › ${tname} › ${wt4} 상세내용 수정:\n"${inp.text}"`;
+    }
+    default: return JSON.stringify(inp);
+  }
+}
+
+function applyTool(msgIdx, toolIdx) {
+  console.log('[chat] applyTool called:', msgIdx, toolIdx);
+  const msg = (state.chatMessages || [])[msgIdx];
+  if (!msg || !msg.tools) { console.warn('[chat] applyTool: msg or tools not found', msgIdx, state.chatMessages.length); return; }
+  const tool = msg.tools[toolIdx];
+  console.log('[chat] applying:', tool.name, JSON.stringify(tool.input));
+  const ok = _applyToolUse(tool.name, tool.input);
+  console.log('[chat] applyToolUse result:', ok);
+  tool.status = ok ? 'applied' : 'error';
+  if (ok) {
+    const resolvedId = _resolveMemberId(tool.input.memberId);
+    const memberName = getMember(resolvedId)?.name || resolvedId;
+    const actionLabel = {
+      add_task:        '과제 추가',       delete_task:     '과제 삭제',
+      update_task_meta:'과제 정보 수정',  add_activity:    '금주활동 추가',
+      update_activity: '활동 수정',       delete_activity: '활동 삭제',
+      add_detail:      '세부항목 추가',   update_detail:   '세부항목 수정',   delete_detail:  '세부항목 삭제',
+      add_issue:       '이슈 추가',       delete_issue:    '이슈 삭제',
+      add_operation:   '운영사항 추가',   update_operation:'운영사항 수정',   delete_operation:'운영사항 삭제',
+      add_deployment:  '배포 추가',       update_deployment:'배포 수정',      delete_deployment:'배포 삭제',
+    }[tool.name] || tool.name;
+    pushNotification('ai_edit', resolvedId, memberName, actionLabel);
+  } else {
+    showToast('⚠ 해당 항목을 찾을 수 없습니다.');
+  }
+  saveState();
+  renderChatMessages();
+  renderMain();
+}
+
+function cancelTool(msgIdx, toolIdx) {
+  const msg = (state.chatMessages || [])[msgIdx];
+  if (!msg || !msg.tools) return;
+  msg.tools[toolIdx].status = 'cancelled';
+  saveState();
+  renderChatMessages();
+}
+
+function _resolveMemberId(raw) {
+  // ID로 직접 찾기
+  if (state.members[raw]) return raw;
+  // 이름으로 찾기 (AI가 이름을 memberId로 넣는 경우 대비)
+  const found = state.meta.members.find(m => m.name === raw || m.id === raw);
+  return found ? found.id : raw;
+}
+
+function _applyToolUse(name, inp) {
+  inp = Object.assign({}, inp, { memberId: _resolveMemberId(inp.memberId) });
+  const mdata = state.members[inp.memberId];
+  if (!mdata) { console.warn('[chat] memberId not found:', inp.memberId); return false; }
+  switch (name) {
+    case 'add_activity': {
+      const task = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!task) return false;
+      const arr = inp.weekType === 'current' ? task.currentWeekItems : task.nextWeekItems;
+      arr.push({ id: generateId(), text: inp.text, progress: inp.progress ?? '', details: [] });
+      return true;
+    }
+    case 'update_activity': {
+      const task = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!task) return false;
+      const arr = inp.weekType === 'current' ? task.currentWeekItems : task.nextWeekItems;
+      // ID 우선, 없으면 originalText fallback
+      let item = arr.find(i => i.id === inp.itemId);
+      if (!item && inp.originalText) item = arr.find(i => i.text === inp.originalText);
+      if (!item) return false;
+      if (inp.text     !== undefined) item.text     = inp.text;
+      if (inp.progress !== undefined) item.progress = inp.progress;
+      return true;
+    }
+    case 'update_task_meta': {
+      const task = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!task) return false;
+      if (inp.kpiProduct      !== undefined) task.kpiProduct      = inp.kpiProduct;
+      if (inp.deadline        !== undefined) task.deadline        = inp.deadline;
+      if (inp.overallProgress !== undefined) task.overallProgress = inp.overallProgress;
+      return true;
+    }
+    case 'add_issue': {
+      const task = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!task) return false;
+      task.issues.push({ id: generateId(), text: inp.text });
+      return true;
+    }
+    case 'add_operation':
+      mdata.operations.push({ id: generateId(), text: inp.text, weekType: inp.weekType });
+      return true;
+    case 'add_detail': {
+      const task = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!task) return false;
+      const arr = inp.weekType === 'current' ? task.currentWeekItems : task.nextWeekItems;
+      const item = arr.find(i => i.id === inp.itemId);
+      if (!item) return false;
+      if (!item.details) item.details = [];
+      item.details.push({ id: generateId(), text: inp.text });
+      return true;
+    }
+    case 'add_deployment': {
+      if (!mdata.deployments) mdata.deployments = [];
+      mdata.deployments.push({
+        id: generateId(),
+        product:      inp.product      || '',
+        round:        inp.round        || '',
+        deployDate:   inp.deployDate   || '',
+        progressText: inp.progressText || '',
+        counts:       { feature: inp.featureCount ?? 0, bug: inp.bugCount ?? 0 },
+        issues:       inp.issues       || '',
+        redmineItems: [],
+      });
+      return true;
+    }
+    case 'update_operation': {
+      const op = (mdata.operations || []).find(o => o.id === inp.operationId);
+      if (!op) return false;
+      op.text = inp.text;
+      if (inp.weekType !== undefined) op.weekType = inp.weekType;
+      return true;
+    }
+    case 'update_deployment': {
+      const dep = (mdata.deployments || []).find(d => d.id === inp.deploymentId);
+      if (!dep) return false;
+      if (inp.product      !== undefined) dep.product      = inp.product;
+      if (inp.round        !== undefined) dep.round        = inp.round;
+      if (inp.deployDate   !== undefined) dep.deployDate   = inp.deployDate;
+      if (inp.progressText !== undefined) dep.progressText = inp.progressText;
+      if (inp.featureCount !== undefined) { if (!dep.counts) dep.counts = {}; dep.counts.feature = inp.featureCount; }
+      if (inp.bugCount     !== undefined) { if (!dep.counts) dep.counts = {}; dep.counts.bug     = inp.bugCount; }
+      if (inp.issues       !== undefined) dep.issues = inp.issues;
+      return true;
+    }
+    case 'delete_activity': {
+      const task = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!task) return false;
+      const key = inp.weekType === 'current' ? 'currentWeekItems' : 'nextWeekItems';
+      const before = (task[key] || []).length;
+      // ID 우선, 없으면 itemText fallback
+      const toDelAct = (task[key] || []).find(i => i.id === inp.itemId) ||
+        (inp.itemText ? (task[key] || []).find(i => i.text === inp.itemText) : null);
+      if (!toDelAct) return false;
+      task[key] = (task[key] || []).filter(i => i.id !== toDelAct.id);
+      return task[key].length < before;
+    }
+    case 'delete_issue': {
+      const task = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!task) return false;
+      const before = (task.issues || []).length;
+      // ID 우선, 없으면 issueText fallback
+      const toDelIssue = (task.issues || []).find(i => i.id === inp.issueId) ||
+        (inp.issueText ? (task.issues || []).find(i => i.text === inp.issueText) : null);
+      if (!toDelIssue) return false;
+      task.issues = (task.issues || []).filter(i => i.id !== toDelIssue.id);
+      return task.issues.length < before;
+    }
+    case 'delete_operation': {
+      const before = (mdata.operations || []).length;
+      mdata.operations = (mdata.operations || []).filter(o => o.id !== inp.operationId);
+      return mdata.operations.length < before;
+    }
+    case 'delete_deployment': {
+      const before = (mdata.deployments || []).length;
+      // ID 우선, 일치 없으면 product 이름으로 fallback (AI가 ID를 잘못 복사하는 경우 대비)
+      let toDeleteDep = (mdata.deployments || []).find(d => d.id === inp.deploymentId);
+      if (!toDeleteDep && inp.product) toDeleteDep = (mdata.deployments || []).find(d => d.product === inp.product);
+      if (!toDeleteDep) return false;
+      mdata.deployments = mdata.deployments.filter(d => d.id !== toDeleteDep.id);
+      return mdata.deployments.length < before;
+    }
+    case 'add_task': {
+      mdata.tasks.push({
+        id: generateId(),
+        kpiProduct:      inp.kpiProduct      || '',
+        division:        inp.division        || '',
+        deadline:        inp.deadline        || '',
+        overallProgress: inp.overallProgress ?? 0,
+        currentWeekItems: [],
+        nextWeekItems:    [],
+        issues:           [],
+      });
+      return true;
+    }
+    case 'delete_task': {
+      const before = mdata.tasks.length;
+      // ID 우선, 일치 없으면 kpiProduct 이름으로 fallback
+      let toDelTask = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!toDelTask && inp.kpiProduct) toDelTask = mdata.tasks.find(t => t.kpiProduct === inp.kpiProduct);
+      if (!toDelTask) return false;
+      mdata.tasks = mdata.tasks.filter(t => t.id !== toDelTask.id);
+      return mdata.tasks.length < before;
+    }
+    case 'delete_detail': {
+      const task = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!task) return false;
+      const arr = inp.weekType === 'current' ? task.currentWeekItems : task.nextWeekItems;
+      const item = (arr || []).find(i => i.id === inp.itemId);
+      if (!item || !item.details) return false;
+      const before = item.details.length;
+      // ID 우선, 없으면 originalText로 fallback
+      const toDelId = (item.details.find(d => d.id === inp.detailId) || (inp.originalText ? item.details.find(d => d.text === inp.originalText) : null) || {}).id;
+      if (!toDelId) return false;
+      item.details = item.details.filter(d => d.id !== toDelId);
+      return item.details.length < before;
+    }
+    case 'update_detail': {
+      const task = mdata.tasks.find(t => t.id === inp.taskId);
+      if (!task) return false;
+      const arr = inp.weekType === 'current' ? task.currentWeekItems : task.nextWeekItems;
+      const item = (arr || []).find(i => i.id === inp.itemId);
+      if (!item || !item.details) return false;
+      // ID 우선, 없으면 originalText로 fallback
+      const detail = item.details.find(d => d.id === inp.detailId) || (inp.originalText ? item.details.find(d => d.text === inp.originalText) : null);
+      if (!detail) return false;
+      detail.text = inp.text;
+      return true;
+    }
+    default: return false;
+  }
+}
+
+function _appendLoadingMsg() {
+  const c = document.getElementById('chatMessages');
+  if (!c) return;
+  const el = document.createElement('div');
+  el.className = 'chat-msg chat-loading';
+  el.id = 'chatLoadingMsg';
+  el.textContent = '응답 대기 중...';
+  c.appendChild(el);
+  c.scrollTop = c.scrollHeight;
+}
+function _removeLoadingMsg() {
+  const el = document.getElementById('chatLoadingMsg');
+  if (el) el.remove();
+}
+function _appendErrorMsg(msg) {
+  const c = document.getElementById('chatMessages');
+  if (!c) return;
+  const el = document.createElement('div');
+  el.className = 'chat-msg error';
+  el.textContent = '⚠ ' + msg;
+  c.appendChild(el);
+  c.scrollTop = c.scrollHeight;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  loadState();
+  loadNotifications();
+  renderSidebar();
+  renderMain();
+
+  const lastVisit = parseInt(localStorage.getItem(LAST_VISIT_KEY) || '0', 10);
+  const elapsed = Date.now() - lastVisit;
+  if (!state.meta.teamName || elapsed > LANDING_TIMEOUT_MS) {
+    showLanding();
+  } else {
+    localStorage.setItem(LAST_VISIT_KEY, String(Date.now()));
+  }
+
+  // 벨 아이콘 마운트
+  const bellMount = document.getElementById('notifBellMount');
+  if (bellMount) bellMount.innerHTML = renderNotificationBell();
+
+  // 패널 외부 클릭 시 닫기 (중복 등록 방지)
+  if (!window._notifClickListenerAdded) {
+    document.addEventListener('click', (e) => {
+      if (_notifOpen && !e.target.closest('.notif-wrap') && !e.target.closest('#notifPanel')) {
+        closeNotifPanel();
+      }
+    });
+    window._notifClickListenerAdded = true;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
