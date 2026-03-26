@@ -1536,47 +1536,56 @@
     .issue-cell { background: var(--red-light); }
     /* Filter bar */
     .team-filter-bar {
-      display: flex; flex-direction: column; gap: 6px;
-      padding: 8px 12px; background: var(--card-bg);
+      display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+      padding: 7px 12px; background: var(--card-bg);
       border: 1px solid var(--border-light); border-radius: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 12px; font-size: 12px;
     }
-    .team-filter-row { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
     .team-filter-divider {
       width: 1px; height: 14px; background: var(--border);
-      margin: 0 6px; flex-shrink: 0; opacity: 0.4;
+      margin: 0 10px; flex-shrink: 0; opacity: 0.35;
     }
     .team-filter-label {
-      font-size: 11px; color: var(--text-muted); white-space: nowrap; padding: 0 4px;
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      white-space: nowrap; margin-right: 6px; letter-spacing: 0.02em;
     }
+    /* Member checkboxes */
+    .tf-members { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .tf-member-label {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; color: var(--text-secondary); cursor: pointer;
+      white-space: nowrap;
+    }
+    .tf-member-label input[type="checkbox"] {
+      width: 13px; height: 13px; accent-color: var(--primary);
+      cursor: pointer; margin: 0; flex-shrink: 0;
+    }
+    .tf-member-label:hover { color: var(--text); }
+    /* Progress chips (radio-style) */
     .tf-chip {
-      display: inline-flex; align-items: center; gap: 3px;
-      padding: 3px 9px; border-radius: 6px; font-size: 12px;
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 5px; font-size: 12px;
       cursor: pointer; border: none; background: transparent;
       color: var(--text-muted); transition: background 0.1s, color 0.1s;
       user-select: none; white-space: nowrap;
     }
     .tf-chip:hover { background: var(--bg); color: var(--text-secondary); }
-    .tf-chip.active {
-      background: var(--primary-light); color: var(--primary); font-weight: 600;
-    }
-    .tf-chip.active-all { background: var(--primary-light); color: var(--primary); font-weight: 600; }
-    .tf-chip-check { font-size: 9px; }
+    .tf-chip.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
     .tf-chip.issue-chip.active { background: #FEF2F2; color: var(--red); font-weight: 600; }
     .tf-chip.issue-chip:hover { background: #FEF2F2; color: var(--red); }
     .tf-sort-select {
-      font-size: 12px; padding: 3px 22px 3px 8px; border: none;
-      border-radius: 6px; background: transparent; color: var(--text-muted);
+      font-size: 12px; padding: 2px 20px 2px 6px; border: none;
+      border-radius: 5px; background: transparent; color: var(--text-muted);
       cursor: pointer; appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%2394A3B8'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 6px center;
+      background-repeat: no-repeat; background-position: right 5px center;
       transition: background 0.1s, color 0.1s;
     }
     .tf-sort-select:hover { background-color: var(--bg); color: var(--text-secondary); }
     .tf-sort-select:focus { outline: none; }
     .tf-reset-btn {
-      margin-left: auto; padding: 3px 8px; font-size: 11px;
-      border: none; border-radius: 6px; background: transparent;
+      margin-left: auto; padding: 2px 6px; font-size: 11px;
+      border: none; border-radius: 5px; background: transparent;
       color: var(--text-muted); cursor: pointer; transition: color 0.1s;
     }
     .tf-reset-btn:hover { color: var(--red); }
@@ -4367,42 +4376,42 @@ function renderTeamCardView() {
 function renderTeamFilterBar() {
   const allSelected = _teamFilter.members.length === 0;
 
-  const chip = (label, isActive, isAll, onclick, extra='') =>
-    `<button class="tf-chip${isActive ? (isAll ? ' active-all' : ' active') : ''}${extra}" onclick="${onclick}">
-      ${isActive ? '<span class="tf-chip-check">✓</span> ' : ''}${label}
-    </button>`;
+  const allCb = `<label class="tf-member-label">
+    <input type="checkbox" ${allSelected ? 'checked' : ''}
+      onchange="applyTeamFilter('all',null,true)">
+    전체
+  </label>`;
 
-  const memberChips = state.meta.members.map(m => {
-    const active = allSelected || _teamFilter.members.includes(m.id);
-    return chip(esc(m.name), active, false, `applyTeamFilter('member','${m.id}',${!active})`);
+  const memberCbs = state.meta.members.map(m => {
+    const checked = allSelected || _teamFilter.members.includes(m.id);
+    return `<label class="tf-member-label">
+      <input type="checkbox" value="${m.id}" ${checked ? 'checked' : ''}
+        onchange="applyTeamFilter('member',this.value,this.checked)">
+      ${esc(m.name)}
+    </label>`;
   }).join('');
 
-  const pctChip = (val, label) =>
-    chip(label, _teamFilter.progressRange === val, false, `applyTeamFilter('progressRange','${val}')`);
+  const pct = (val, label) =>
+    `<button class="tf-chip${_teamFilter.progressRange===val?' active':''}" onclick="applyTeamFilter('progressRange','${val}')">${label}</button>`;
 
   return `<div class="team-filter-bar">
-    <div class="team-filter-row">
-      ${chip('전체', allSelected, true, "applyTeamFilter('all',null,true)")}
-      <div class="team-filter-divider"></div>
-      ${memberChips}
-    </div>
-    <div class="team-filter-row">
-      ${pctChip('all', '전체')}
-      ${pctChip('low', '0–30%')}
-      ${pctChip('mid', '30–70%')}
-      ${pctChip('high', '70–100%')}
-      <div class="team-filter-divider"></div>
-      ${chip('⚠ 이슈', _teamFilter.issuesOnly, false, `applyTeamFilter('issuesOnly',null,${!_teamFilter.issuesOnly})`, ' issue-chip')}
-      <div class="team-filter-divider"></div>
-      <select class="tf-sort-select" onchange="applyTeamFilter('sort',this.value)">
-        <option value="default" ${_teamFilter.sort==='default'?'selected':''}>기본순</option>
-        <option value="pct_asc" ${_teamFilter.sort==='pct_asc'?'selected':''}>진척율 ↑</option>
-        <option value="pct_desc" ${_teamFilter.sort==='pct_desc'?'selected':''}>진척율 ↓</option>
-        <option value="deadline_asc" ${_teamFilter.sort==='deadline_asc'?'selected':''}>기한 ↑</option>
-        <option value="deadline_desc" ${_teamFilter.sort==='deadline_desc'?'selected':''}>기한 ↓</option>
-      </select>
-      <button class="tf-reset-btn" onclick="resetTeamFilter()">↺ 초기화</button>
-    </div>
+    <span class="team-filter-label">팀원</span>
+    <div class="tf-members">${allCb}${memberCbs}</div>
+    <div class="team-filter-divider"></div>
+    <span class="team-filter-label">진척율</span>
+    ${pct('all','전체')}${pct('low','0–30%')}${pct('mid','30–70%')}${pct('high','70–100%')}
+    <div class="team-filter-divider"></div>
+    <button class="tf-chip issue-chip${_teamFilter.issuesOnly?' active':''}"
+      onclick="applyTeamFilter('issuesOnly',null,${!_teamFilter.issuesOnly})">⚠ 이슈</button>
+    <div class="team-filter-divider"></div>
+    <select class="tf-sort-select" onchange="applyTeamFilter('sort',this.value)">
+      <option value="default" ${_teamFilter.sort==='default'?'selected':''}>기본순</option>
+      <option value="pct_asc" ${_teamFilter.sort==='pct_asc'?'selected':''}>진척율 ↑</option>
+      <option value="pct_desc" ${_teamFilter.sort==='pct_desc'?'selected':''}>진척율 ↓</option>
+      <option value="deadline_asc" ${_teamFilter.sort==='deadline_asc'?'selected':''}>기한 ↑</option>
+      <option value="deadline_desc" ${_teamFilter.sort==='deadline_desc'?'selected':''}>기한 ↓</option>
+    </select>
+    <button class="tf-reset-btn" onclick="resetTeamFilter()">↺ 초기화</button>
   </div>`;
 }
 
