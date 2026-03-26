@@ -1464,6 +1464,13 @@
     }
     .team-filter-reset:hover { background: var(--bg); color: var(--text); }
 
+    .team-summary-export-btn {
+      background: var(--primary); color: white;
+      border: none; border-radius: 6px; padding: 5px 12px;
+      font-size: 12px; cursor: pointer; font-weight: 600;
+    }
+    .team-summary-export-btn:hover { opacity: 0.88; }
+
     /* ===== DEPLOY TIMELINE ===== */
     .deploy-timeline {
       margin-top: 16px; padding: 12px 16px;
@@ -3024,6 +3031,29 @@ async function exportToExcel() {
   }
 }
 
+async function exportTeamSummary() {
+  showToast('팀 보고서 생성 중...');
+  try {
+    const wb = new ExcelJS.Workbook();
+    const sheetName = `${state.meta.month}월${state.meta.week}주차`;
+    buildTeamSummarySheet(wb.addWorksheet(sheetName));
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${state.meta.teamName}_주간보고_${state.meta.month}월_${state.meta.week}주차.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('✓ 팀 보고서 내보내기 완료!');
+  } catch (err) {
+    console.error('Team summary export error:', err);
+    showToast('오류: ' + err.message);
+  }
+}
+
 // ============================================================
 // EXCEL SHEET BUILDER — 예시.xlsx 포맷 그대로
 // ============================================================
@@ -3568,6 +3598,196 @@ function buildTeamSheet(ws) {
         applySubRowBorder(row); row++;
       }
       applyBottomSep(row - 1);
+    }
+  }
+}
+
+function buildTeamSummarySheet(ws) {
+  // 컬럼 너비
+  ws.getColumn(1).width = 3;   // A spacer
+  ws.getColumn(2).width = 14;  // B 구분
+  ws.getColumn(3).width = 12;  // C 내용
+  ws.getColumn(4).width = 20;  // D 구분/과제명
+  ws.getColumn(5).width = 28;  // E 주요활동
+  ws.getColumn(6).width = 8;   // F 단계
+  ws.getColumn(7).width = 12;  // G 기한
+  ws.getColumn(8).width = 10;  // H 진척%
+  ws.getColumn(9).width = 16;  // I 비고/일정
+
+  const HDR_FILL = { type:'pattern', pattern:'solid', fgColor:{argb:'FF334155'} };
+  const HDR_FONT = { size:10, bold:true, color:{argb:'FFFFFFFF'} };
+  const BODY_FONT = { size:10, name:'맑은 고딕' };
+  const WRAP = { wrapText: true, vertical: 'top' };
+  const BORDER_ALL = {
+    top:{style:'thin'}, bottom:{style:'thin'},
+    left:{style:'thin'}, right:{style:'thin'}
+  };
+
+  function hdrCell(cell, val) {
+    cell.value = val; cell.fill = HDR_FILL; cell.font = HDR_FONT;
+    cell.alignment = { horizontal:'center', vertical:'middle' };
+    cell.border = BORDER_ALL;
+  }
+  function bodyCell(cell, val) {
+    cell.value = val; cell.font = BODY_FONT;
+    cell.alignment = WRAP; cell.border = BORDER_ALL;
+  }
+  function sectionLabel(row, label) {
+    const c = ws.getCell(row, 2);
+    c.value = label;
+    c.font = { size:10, bold:true };
+    c.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE2E8F0'} };
+    c.border = BORDER_ALL;
+  }
+
+  // Row 1: 헤더
+  ws.getCell(1,2).value = `${state.meta.month}월 ${state.meta.week}주차`;
+  ws.getCell(1,4).value = `${state.meta.teamName} 주간 업무 보고`;
+  ws.getCell(1,4).font = { size:13, bold:true };
+
+  // Row 4: 구분/내용 헤더
+  ws.getCell(4,2).value = '구분'; ws.getCell(4,3).value = '내용';
+
+  // ── 금주실적 ──
+  let row = 6;
+  sectionLabel(row, '금주실적');
+  ws.getCell(row, 3).value = '■ 주요 활동';
+  row++;
+
+  // 헤더행
+  hdrCell(ws.getCell(row, 4), '구분');
+  ['주요활동','주요활동','주요활동','주요활동'].forEach((v, i) => hdrCell(ws.getCell(row, 5+i), v));
+  hdrCell(ws.getCell(row, 9), '일정');
+  row++;
+
+  // 데이터: 전 팀원 tasks → currentWeekItems
+  for (const m of state.meta.members) {
+    for (const t of (getMemberData(m.id).tasks || [])) {
+      const items = (t.currentWeekItems || []).filter(i => i.text);
+      const text = items.map(i => '- ' + i.text).join('\n');
+      if (!text && !t.kpiProduct) continue;
+      bodyCell(ws.getCell(row, 4), t.kpiProduct || '');
+      ws.getCell(row, 5).value = text;
+      ws.getCell(row, 5).font = BODY_FONT;
+      ws.getCell(row, 5).alignment = WRAP;
+      ws.getCell(row, 5).border = BORDER_ALL;
+      ws.mergeCells(row, 5, row, 8); // E–H 병합
+      bodyCell(ws.getCell(row, 9), t.deadline || '');
+      ws.getRow(row).height = Math.max(20, items.length * 16);
+      row++;
+    }
+  }
+
+  row += 2;
+
+  // ── 차주계획 ──
+  sectionLabel(row, '차주계획');
+  ws.getCell(row, 3).value = '■ 주요 계획';
+  row++;
+
+  hdrCell(ws.getCell(row, 4), '구분');
+  ['주요활동','주요활동','주요활동','주요활동'].forEach((v, i) => hdrCell(ws.getCell(row, 5+i), v));
+  hdrCell(ws.getCell(row, 9), '일정');
+  row++;
+
+  for (const m of state.meta.members) {
+    for (const t of (getMemberData(m.id).tasks || [])) {
+      const items = (t.nextWeekItems || []).filter(i => i.text);
+      const text = items.map(i => '- ' + i.text).join('\n');
+      if (!text && !t.kpiProduct) continue;
+      bodyCell(ws.getCell(row, 4), t.kpiProduct || '');
+      ws.getCell(row, 5).value = text;
+      ws.getCell(row, 5).font = BODY_FONT;
+      ws.getCell(row, 5).alignment = WRAP;
+      ws.getCell(row, 5).border = BORDER_ALL;
+      ws.mergeCells(row, 5, row, 8); // E–H 병합
+      bodyCell(ws.getCell(row, 9), t.deadline || '');
+      ws.getRow(row).height = Math.max(20, items.length * 16);
+      row++;
+    }
+  }
+
+  row += 2;
+
+  // ── 주요이슈 ──
+  sectionLabel(row, '주요이슈 &');
+  ws.getCell(row, 3).value = '■ 주요 이슈';
+  ws.getCell(row+1, 2).value = '타본부협조사항';
+  row += 2;
+
+  for (const m of state.meta.members) {
+    for (const t of (getMemberData(m.id).tasks || [])) {
+      const issues = (t.issues || []).filter(i => i.text);
+      if (!issues.length) continue;
+      const text = issues.map(i => '- ' + i.text).join('\n');
+      bodyCell(ws.getCell(row, 4), t.kpiProduct || '');
+      ws.getCell(row, 5).value = text;
+      ws.getCell(row, 5).font = BODY_FONT;
+      ws.getCell(row, 5).alignment = WRAP;
+      ws.getCell(row, 5).border = BORDER_ALL;
+      ws.mergeCells(row, 5, row, 8); // E–H 병합
+      bodyCell(ws.getCell(row, 9), '');
+      row++;
+    }
+  }
+
+  row += 2;
+
+  // ── 프로젝트 진척도 ──
+  sectionLabel(row, '프로젝트 진척도');
+  row++;
+
+  hdrCell(ws.getCell(row, 4), '프로젝트');
+  hdrCell(ws.getCell(row, 5), '프로젝트');
+  hdrCell(ws.getCell(row, 6), '단계');
+  hdrCell(ws.getCell(row, 7), '기한');
+  hdrCell(ws.getCell(row, 8), '진척%');
+  hdrCell(ws.getCell(row, 9), '비고');
+  row++;
+
+  for (const m of state.meta.members) {
+    for (const t of (getMemberData(m.id).tasks || [])) {
+      if (!t.kpiProduct) continue;
+      bodyCell(ws.getCell(row, 4), t.kpiProduct);
+      bodyCell(ws.getCell(row, 5), t.kpiProduct);
+      bodyCell(ws.getCell(row, 6), '');
+      bodyCell(ws.getCell(row, 7), t.deadline || '');
+      const pctCell = ws.getCell(row, 8);
+      pctCell.value = (t.overallProgress || 0) / 100;
+      pctCell.numFmt = '0%';
+      pctCell.font = BODY_FONT;
+      pctCell.border = BORDER_ALL;
+      bodyCell(ws.getCell(row, 9), '');
+      row++;
+    }
+  }
+
+  row += 2;
+
+  // ── 제품배포 ──
+  sectionLabel(row, '제품배포');
+  row++;
+
+  hdrCell(ws.getCell(row, 4), '제품');
+  hdrCell(ws.getCell(row, 5), '차수');
+  hdrCell(ws.getCell(row, 6), '배포기한');
+  hdrCell(ws.getCell(row, 7), '건수(기능/오류)');
+  hdrCell(ws.getCell(row, 8), '진척');
+  hdrCell(ws.getCell(row, 9), '진척');
+  row++;
+
+  for (const m of state.meta.members) {
+    for (const dep of (getMemberData(m.id).deployments || [])) {
+      if (!dep.product) continue;
+      const feat = dep.counts ? (dep.counts.feature || 0) : 0;
+      const bug  = dep.counts ? (dep.counts.bug  || 0) : 0;
+      bodyCell(ws.getCell(row, 4), dep.product);
+      bodyCell(ws.getCell(row, 5), dep.round || '');
+      bodyCell(ws.getCell(row, 6), dep.deployDate || '');
+      bodyCell(ws.getCell(row, 7), `${feat+bug}건(${feat}/${bug})`);
+      bodyCell(ws.getCell(row, 8), dep.progressText || '');
+      bodyCell(ws.getCell(row, 9), dep.progressText || '');
+      row++;
     }
   }
 }
@@ -4144,6 +4364,7 @@ function renderTeamView() {
       <div class="member-status-bar">
         <!--<span class="team-done-count${allDone ? ' all-done' : ''}">${doneCount}/${total} 완료</span>-->
         <!--<button class="status-btn status-done-btn" onclick="collectTeam()">취합하기</button>-->
+        <button class="status-btn team-summary-export-btn" onclick="exportTeamSummary()">📊 팀 보고서 내보내기</button>
       </div>
     </div>
     ${renderTeamStatBar()}
