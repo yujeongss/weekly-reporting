@@ -1534,84 +1534,68 @@
     .pct-delta.down { color: #DC2626; }
     .team-td-issue { color: var(--red); font-size: 12px; }
     .issue-cell { background: var(--red-light); }
-    /* Filter bar — 2026 modern */
+    /* Filter bar — 2026 clean */
     .team-filter-bar {
-      display: flex; flex-direction: column; gap: 10px;
-      padding: 14px 16px; background: var(--card-bg);
-      border: 1px solid var(--border-light); border-radius: 14px;
-      margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 10px 12px;
+      background: rgba(248,250,255,0.85);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(226,232,240,0.7);
+      border-radius: 16px; margin-bottom: 14px;
+      box-shadow: 0 2px 12px rgba(79,70,229,0.05), 0 1px 3px rgba(0,0,0,0.03);
     }
-    .team-filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .team-filter-row {
+      display: flex; align-items: center; gap: 2px;
+      flex-wrap: wrap;
+    }
     .team-filter-divider {
-      width: 1px; height: 20px; background: var(--border-light); margin: 0 2px;
+      width: 1px; height: 18px; background: var(--border);
+      margin: 0 8px; flex-shrink: 0; opacity: 0.5;
     }
     .team-filter-label {
-      font-size: 11px; font-weight: 600; color: var(--text-muted);
-      letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+      font-size: 11px; font-weight: 500; color: var(--text-muted);
+      white-space: nowrap; padding: 0 6px; letter-spacing: 0.02em;
     }
-    /* Member chips */
+    /* Unified chip base */
     .tf-chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 500;
-      cursor: pointer; border: 1.5px solid var(--border-light);
-      background: transparent; color: var(--text-secondary);
-      transition: all 0.15s ease; user-select: none;
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 4px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 500;
+      cursor: pointer; border: none; background: transparent;
+      color: var(--text-secondary); transition: background 0.12s, color 0.12s;
+      user-select: none; white-space: nowrap; line-height: 1.4;
     }
-    .tf-chip:hover { border-color: var(--primary); color: var(--primary); background: rgba(99,102,241,0.05); }
+    .tf-chip:hover { background: var(--primary-light); color: var(--primary); }
     .tf-chip.active {
-      background: var(--primary); border-color: var(--primary);
-      color: white; box-shadow: 0 2px 6px rgba(99,102,241,0.3);
+      background: var(--primary); color: white;
+      box-shadow: 0 1px 6px rgba(79,70,229,0.22);
     }
-    .tf-chip.active-all {
-      background: var(--text); border-color: var(--text);
-      color: white;
-    }
-    .tf-chip.active-all:hover { opacity: 0.85; }
-    .tf-chip-check { font-size: 10px; }
-    /* Segmented control */
-    .tf-segment {
-      display: inline-flex; background: var(--bg); border: 1px solid var(--border-light);
-      border-radius: 8px; overflow: hidden;
-    }
-    .tf-seg-btn {
-      padding: 4px 10px; font-size: 12px; font-weight: 500; border: none;
-      background: transparent; color: var(--text-muted); cursor: pointer;
-      transition: all 0.15s ease; white-space: nowrap;
-    }
-    .tf-seg-btn:hover { color: var(--text); background: rgba(0,0,0,0.04); }
-    .tf-seg-btn.active {
-      background: var(--primary); color: white; border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(99,102,241,0.25);
-    }
-    /* Issue toggle */
-    .tf-issue-btn {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 500;
-      cursor: pointer; border: 1.5px solid var(--border-light);
-      background: transparent; color: var(--text-secondary);
-      transition: all 0.15s ease;
-    }
-    .tf-issue-btn.active {
-      background: rgba(220,38,38,0.08); border-color: var(--red);
-      color: var(--red); font-weight: 600;
-    }
+    .tf-chip.active:hover { background: var(--primary-dark); }
+    .tf-chip.active-all { background: #1E293B; color: white; }
+    .tf-chip.active-all:hover { background: #334155; }
+    .tf-chip-check { font-size: 9px; opacity: 0.9; }
+    /* Issue chip */
+    .tf-chip.issue-chip { color: var(--text-secondary); }
+    .tf-chip.issue-chip:hover { background: #FEF2F2; color: var(--red); }
+    .tf-chip.issue-chip.active { background: #FEF2F2; color: var(--red); box-shadow: none; }
+    .tf-chip.issue-chip.active:hover { background: #FEE2E2; }
     /* Sort select */
     .tf-sort-select {
-      font-size: 12px; font-weight: 500; padding: 4px 8px;
-      border: 1.5px solid var(--border-light); border-radius: 8px;
-      background: var(--bg); color: var(--text); cursor: pointer;
-      appearance: none; padding-right: 22px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 7px center;
+      font-size: 12.5px; font-weight: 500; padding: 4px 26px 4px 10px;
+      border: none; border-radius: 8px; background: transparent;
+      color: var(--text-secondary); cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%2394A3B8'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center;
+      transition: background 0.12s, color 0.12s;
     }
+    .tf-sort-select:hover { background-color: var(--primary-light); color: var(--primary); }
+    .tf-sort-select:focus { outline: none; }
     /* Reset btn */
     .tf-reset-btn {
-      margin-left: auto; padding: 4px 12px; font-size: 12px; font-weight: 500;
-      border: 1.5px solid var(--border-light); border-radius: 8px;
-      background: transparent; color: var(--text-muted); cursor: pointer;
-      transition: all 0.15s ease;
+      margin-left: auto; padding: 4px 10px; font-size: 12px; font-weight: 500;
+      border: none; border-radius: 8px; background: transparent;
+      color: var(--text-muted); cursor: pointer; transition: background 0.12s, color 0.12s;
     }
-    .tf-reset-btn:hover { border-color: var(--red); color: var(--red); background: rgba(220,38,38,0.04); }
+    .tf-reset-btn:hover { background: #FEF2F2; color: var(--red); }
 
     .progress-select { min-width: 80px; }
 
@@ -4398,38 +4382,34 @@ function renderTeamCardView() {
 
 function renderTeamFilterBar() {
   const allSelected = _teamFilter.members.length === 0;
+
+  const chip = (label, isActive, isAll, onclick, extra='') =>
+    `<button class="tf-chip${isActive ? (isAll ? ' active-all' : ' active') : ''}${extra}" onclick="${onclick}">
+      ${isActive ? '<span class="tf-chip-check">✓</span> ' : ''}${label}
+    </button>`;
+
   const memberChips = state.meta.members.map(m => {
     const active = allSelected || _teamFilter.members.includes(m.id);
-    return `<button class="tf-chip${active ? ' active' : ''}" onclick="applyTeamFilter('member','${m.id}',${!active})">
-      ${active ? '<span class="tf-chip-check">✓</span>' : ''}${esc(m.name)}
-    </button>`;
+    return chip(esc(m.name), active, false, `applyTeamFilter('member','${m.id}',${!active})`);
   }).join('');
 
-  const allChip = `<button class="tf-chip${allSelected ? ' active-all' : ''}" onclick="applyTeamFilter('all',null,true)">
-    ${allSelected ? '<span class="tf-chip-check">✓</span>' : ''}전체
-  </button>`;
-
-  const seg = (val, label) =>
-    `<button class="tf-seg-btn${_teamFilter.progressRange===val?' active':''}" onclick="applyTeamFilter('progressRange','${val}')">${label}</button>`;
+  const pctChip = (val, label) =>
+    chip(label, _teamFilter.progressRange === val, false, `applyTeamFilter('progressRange','${val}')`);
 
   return `<div class="team-filter-bar">
     <div class="team-filter-row">
-      <span class="team-filter-label">팀원</span>
-      ${allChip}
+      ${chip('전체', allSelected, true, "applyTeamFilter('all',null,true)")}
       <div class="team-filter-divider"></div>
       ${memberChips}
     </div>
     <div class="team-filter-row">
-      <span class="team-filter-label">진척율</span>
-      <div class="tf-segment">
-        ${seg('all','전체')}${seg('low','0–30%')}${seg('mid','30–70%')}${seg('high','70–100%')}
-      </div>
+      ${pctChip('all', '전체')}
+      ${pctChip('low', '0–30%')}
+      ${pctChip('mid', '30–70%')}
+      ${pctChip('high', '70–100%')}
       <div class="team-filter-divider"></div>
-      <button class="tf-issue-btn${_teamFilter.issuesOnly?' active':''}" onclick="applyTeamFilter('issuesOnly',null,${!_teamFilter.issuesOnly})">
-        ⚠ 이슈만
-      </button>
+      ${chip('⚠ 이슈', _teamFilter.issuesOnly, false, `applyTeamFilter('issuesOnly',null,${!_teamFilter.issuesOnly})`, ' issue-chip')}
       <div class="team-filter-divider"></div>
-      <span class="team-filter-label">정렬</span>
       <select class="tf-sort-select" onchange="applyTeamFilter('sort',this.value)">
         <option value="default" ${_teamFilter.sort==='default'?'selected':''}>기본순</option>
         <option value="pct_asc" ${_teamFilter.sort==='pct_asc'?'selected':''}>진척율 ↑</option>
@@ -4437,7 +4417,7 @@ function renderTeamFilterBar() {
         <option value="deadline_asc" ${_teamFilter.sort==='deadline_asc'?'selected':''}>기한 ↑</option>
         <option value="deadline_desc" ${_teamFilter.sort==='deadline_desc'?'selected':''}>기한 ↓</option>
       </select>
-      <button class="tf-reset-btn" onclick="resetTeamFilter()">↺ 초기화</button>
+      <button class="tf-reset-btn" onclick="resetTeamFilter()">초기화</button>
     </div>
   </div>`;
 }
