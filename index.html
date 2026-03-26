@@ -768,6 +768,22 @@
     .task-card:hover .task-remove-btn,
     .deploy-card:hover .task-remove-btn { opacity: 1; }
     .task-remove-btn:hover { background: var(--red-light); color: var(--red); border-color: #FCA5A5; }
+    .task-copy-btn {
+      background: none; border: 1px solid var(--border-light); border-radius: 4px;
+      padding: 2px 6px; font-size: 13px; cursor: pointer; color: var(--text-muted);
+    }
+    .task-copy-btn:hover { background: var(--bg); color: var(--text); }
+    .carryover-btn {
+      background: none; border: none; font-size: 11px; color: var(--primary);
+      cursor: pointer; padding: 1px 4px;
+    }
+    .carryover-btn:hover { text-decoration: underline; }
+    .paste-task-btn {
+      background: var(--primary-light, #EEF2FF); color: var(--primary);
+      border: 1px solid var(--primary); border-radius: 6px;
+      padding: 4px 10px; font-size: 12px; cursor: pointer;
+    }
+    .paste-task-btn:hover { opacity: 0.85; }
 
     .task-body {
       display: grid;
@@ -2516,11 +2532,18 @@ function renderTasksSection(memberId, data) {
     ? '<div class="empty-state">과제를 추가하세요. 과제별로 금주활동, 차주계획, 이슈사항을 관리합니다.</div>'
     : data.tasks.map(t => renderTaskCard(memberId, t)).join('');
 
+  const pasteBtn = _clipboard
+    ? `<button class="paste-task-btn" onclick="pasteTask('${memberId}')">📋 붙여넣기 (${esc(_clipboard.kpiProduct || '과제')})</button>`
+    : '';
+
   return `
     <div class="section">
       <div class="section-header">
         <span class="section-title">과제</span>
-        <button class="add-btn" onclick="addTask('${memberId}')">+ 과제 추가</button>
+        <div style="display:flex;gap:6px;">
+          ${pasteBtn}
+          <button class="add-btn" onclick="addTask('${memberId}')">+ 과제 추가</button>
+        </div>
       </div>
       ${inner}
     </div>`;
@@ -2550,7 +2573,10 @@ function renderTaskCard(memberId, task) {
                placeholder="KPI / 제품명"
                data-member="${memberId}" data-task="${task.id}" data-field="kpiProduct"
                onblur="updateTaskCEField(this)">${esc(task.kpiProduct || '')}</div>
-          <button class="task-remove-btn" onclick="removeTask('${memberId}','${task.id}')">🗑 과제 삭제</button>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="task-copy-btn" onclick="copyTask('${memberId}','${task.id}')" title="과제 복사">⧉</button>
+            <button class="task-remove-btn" onclick="removeTask('${memberId}','${task.id}')">🗑 과제 삭제</button>
+          </div>
         </div>
         <div class="task-fields">
           <div class="field-group">
@@ -2585,7 +2611,10 @@ function renderTaskCard(memberId, task) {
                   onclick="addTaskItem('${memberId}','${task.id}','current')">+ 항목 추가</button>
         </div>
         <div class="activity-col">
-          <h4 class="next">차주계획</h4>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <h4 class="next" style="margin:0;">차주계획</h4>
+            <button class="carryover-btn" onclick="carryOverTask('${memberId}','${task.id}')" title="차주계획을 금주활동으로 이월">↰ 이월</button>
+          </div>
           ${nextItemsHtml}
           <button class="add-item-btn"
                   onclick="addTaskItem('${memberId}','${task.id}','next')">+ 항목 추가</button>
@@ -2852,6 +2881,46 @@ function undoRemoveTask() {
   saveState();
   renderMain();
   showToast('↩ 삭제가 취소되었습니다');
+}
+
+function copyTask(memberId, taskId) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  _clipboard = JSON.parse(JSON.stringify(task));
+  showToast(`"${task.kpiProduct || '과제'}" 복사됨`);
+  renderMain();
+}
+
+function pasteTask(memberId) {
+  if (!_clipboard) return;
+  const newTask = JSON.parse(JSON.stringify(_clipboard));
+  newTask.id = generateId();
+  newTask.currentWeekItems = (newTask.currentWeekItems || []).map(i => ({
+    ...i, id: generateId(),
+    details: (i.details || []).map(d => ({ ...d, id: generateId() }))
+  }));
+  newTask.nextWeekItems = (newTask.nextWeekItems || []).map(i => ({
+    ...i, id: generateId(),
+    details: (i.details || []).map(d => ({ ...d, id: generateId() }))
+  }));
+  newTask.issues = (newTask.issues || []).map(i => ({ ...i, id: generateId() }));
+  getMemberData(memberId).tasks.push(newTask);
+  saveState();
+  renderMain();
+  showToast('과제 붙여넣기 완료');
+}
+
+function carryOverTask(memberId, taskId) {
+  const task = getMemberData(memberId).tasks.find(t => t.id === taskId);
+  if (!task) return;
+  task.currentWeekItems = (task.nextWeekItems || []).map(i => ({
+    ...i, id: generateId(),
+    details: (i.details || []).map(d => ({ ...d, id: generateId() }))
+  }));
+  task.nextWeekItems = [];
+  saveState();
+  renderMain();
+  showToast('차주계획을 금주활동으로 이월했습니다');
 }
 
 function updateTaskCEField(el) {
@@ -4646,6 +4715,7 @@ function closeNotifPanel() {
 // ============================================================
 let _toastTimer = null;
 let _undoStack = null; // { memberId, task, insertIndex, timerId }
+let _clipboard = null; // deep-cloned task object
 // ============================================================
 // LANDING PAGE
 // ============================================================
