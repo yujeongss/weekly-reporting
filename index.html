@@ -669,12 +669,19 @@
 
     /* ===== TASK CARD ===== */
     .task-card {
-      padding: 20px 24px;
+      position: relative;
+      padding: 20px 24px 20px 28px;
       border-bottom: 1px solid var(--border-light);
       transition: background 0.15s ease;
     }
     .task-card:last-child { border-bottom: none; }
     .task-card:hover { background: #FAFBFF; }
+    .drag-handle {
+      position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+      font-size: 16px; color: var(--text-muted); opacity: 0.4; cursor: grab;
+      user-select: none; line-height: 1;
+    }
+    .task-card:hover .drag-handle { opacity: 0.8; }
 
     .task-meta {
       display: flex;
@@ -2566,7 +2573,13 @@ function renderTaskCard(memberId, task) {
   ).join('');
 
   return `
-    <div class="task-card" data-task-id="${task.id}">
+    <div class="task-card" data-task-id="${task.id}"
+         draggable="true"
+         ondragstart="dragTaskStart('${memberId}','${task.id}',event)"
+         ondragover="dragTaskOver(event)"
+         ondrop="dragTaskDrop('${memberId}','${task.id}',event)"
+         ondragend="dragTaskEnd()">
+      <div class="drag-handle" title="드래그하여 순서 변경">⠿</div>
       <div class="task-meta">
         <div class="task-meta-header">
           <div contenteditable="true" class="task-kpi"
@@ -2921,6 +2934,36 @@ function carryOverTask(memberId, taskId) {
   saveState();
   renderMain();
   showToast('차주계획을 금주활동으로 이월했습니다');
+}
+
+function dragTaskStart(memberId, taskId, event) {
+  _dragSrc = { memberId, taskId };
+  event.dataTransfer.effectAllowed = 'move';
+}
+
+function dragTaskOver(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+}
+
+function dragTaskDrop(memberId, taskId, event) {
+  event.preventDefault();
+  if (!_dragSrc || _dragSrc.taskId === taskId) return;
+  if (_dragSrc.memberId !== memberId) return;
+  const data = getMemberData(memberId);
+  const tasks = data.tasks;
+  const fromIdx = tasks.findIndex(t => t.id === _dragSrc.taskId);
+  const toIdx = tasks.findIndex(t => t.id === taskId);
+  if (fromIdx === -1 || toIdx === -1) return;
+  const [moved] = tasks.splice(fromIdx, 1);
+  tasks.splice(toIdx, 0, moved);
+  _dragSrc = null;
+  saveState();
+  renderMain();
+}
+
+function dragTaskEnd() {
+  _dragSrc = null;
 }
 
 function updateTaskCEField(el) {
@@ -4716,6 +4759,7 @@ function closeNotifPanel() {
 let _toastTimer = null;
 let _undoStack = null; // { memberId, task, insertIndex, timerId }
 let _clipboard = null; // deep-cloned task object
+let _dragSrc = null; // { memberId, taskId }
 // ============================================================
 // LANDING PAGE
 // ============================================================
