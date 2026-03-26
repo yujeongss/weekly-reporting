@@ -2000,6 +2000,31 @@
       color: var(--accent); font-size: 10px;
     }
 
+  .onboarding-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 999;
+  }
+  .onboarding-tooltip {
+    position: fixed; z-index: 1000; background: white; border-radius: 10px;
+    padding: 16px; max-width: 280px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  .onboarding-step-num { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+  .onboarding-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .onboarding-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px; }
+  .onboarding-actions { display: flex; justify-content: space-between; }
+  .onboarding-skip-btn {
+    background: none; border: none; font-size: 12px; color: var(--text-muted); cursor: pointer;
+  }
+  .onboarding-next-btn {
+    background: var(--primary); color: white; border: none; border-radius: 6px;
+    padding: 5px 14px; font-size: 12px; cursor: pointer; font-weight: 700;
+  }
+  .help-btn {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    color: white; border-radius: 50%; width: 20px; height: 20px;
+    font-size: 11px; cursor: pointer; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+
   </style>
 </head>
 <body>
@@ -2018,6 +2043,7 @@
       </div>
     </div>
     <button id="sidebarCloseBtn" class="sidebar-close-btn" onclick="toggleSidebar()" title="사이드바 접기">✕</button>
+    <button onclick="startOnboarding()" title="사용 가이드" class="help-btn">?</button>
     <div id="notifBellMount"></div>
   </div>
   <div id="notifPanel" class="notif-panel"></div>
@@ -2435,6 +2461,9 @@ function editTeamName() {
       state.meta.teamName = val;
       saveState();
       if (state.activeTab === '__team__') renderMain();
+      if (!localStorage.getItem('weekly_report_onboarded')) {
+        setTimeout(startOnboarding, 300);
+      }
     }
     updateSidebarTeamName();
     // input 제거 후 wrap 원복
@@ -3095,6 +3124,64 @@ function renderSearchResults(matches) {
       </div>`
     ).join('')}
   </div>`;
+}
+
+const ONBOARDING_STEPS = [
+  { targetSelector: '.sidebar-item:not(#teamTab)',
+    title: '팀원 탭 선택',
+    text: '팀원 이름을 클릭해 해당 팀원의 주간보고를 작성합니다.' },
+  { targetSelector: '.add-btn',
+    title: '과제 추가',
+    text: '+ 과제 추가 버튼으로 KPI 과제를 등록하고 금주활동, 차주계획, 이슈를 입력합니다.' },
+  { targetSelector: '#teamTab',
+    title: '팀현황 확인',
+    text: '팀현황 탭에서 전체 팀원의 진척현황을 한눈에 확인합니다.' },
+  { targetSelector: '.export-btn',
+    title: 'Excel 내보내기',
+    text: 'Excel 내보내기 버튼으로 주간보고 양식을 자동 생성합니다.' }
+];
+
+function startOnboarding() {
+  _onboardingStep = 0;
+  showOnboardingStep();
+}
+
+function showOnboardingStep() {
+  document.querySelector('.onboarding-overlay')?.remove();
+  if (_onboardingStep >= ONBOARDING_STEPS.length) { endOnboarding(); return; }
+  const step = ONBOARDING_STEPS[_onboardingStep];
+  const target = document.querySelector(step.targetSelector);
+  if (!target) { nextOnboarding(); return; }
+
+  const rect = target.getBoundingClientRect();
+  const overlay = document.createElement('div');
+  overlay.className = 'onboarding-overlay';
+  overlay.innerHTML = `
+    <div class="onboarding-backdrop"></div>
+    <div class="onboarding-tooltip" style="top:${rect.bottom + 10}px;left:${Math.max(10, rect.left)}px;">
+      <div class="onboarding-step-num">${_onboardingStep + 1} / ${ONBOARDING_STEPS.length}</div>
+      <div class="onboarding-title">${esc(step.title)}</div>
+      <div class="onboarding-text">${esc(step.text)}</div>
+      <div class="onboarding-actions">
+        <button class="onboarding-skip-btn" onclick="endOnboarding()">건너뛰기</button>
+        <button class="onboarding-next-btn" onclick="nextOnboarding()">
+          ${_onboardingStep < ONBOARDING_STEPS.length - 1 ? '다음 →' : '완료'}
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function nextOnboarding() {
+  _onboardingStep++;
+  showOnboardingStep();
+}
+
+function endOnboarding() {
+  document.querySelector('.onboarding-overlay')?.remove();
+  _onboardingStep = 0;
+  try { localStorage.setItem('weekly_report_onboarded', '1'); } catch(e) {}
 }
 
 function updateTaskCEField(el) {
@@ -4894,6 +4981,7 @@ let _clipboard = null; // deep-cloned task object
 let _dragSrc = null; // { memberId, taskId }
 let _searchQuery = '';
 let _searchOpen = false;
+let _onboardingStep = 0;
 // ============================================================
 // LANDING PAGE
 // ============================================================
