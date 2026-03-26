@@ -1464,6 +1464,8 @@
     }
     .team-filter-reset:hover { background: var(--bg); color: var(--text); }
 
+    .progress-select { min-width: 80px; }
+
     .team-summary-export-btn {
       background: var(--primary); color: white;
       border: none; border-radius: 6px; padding: 5px 12px;
@@ -2506,9 +2508,12 @@ function renderTaskCard(memberId, task) {
           </div>
           <div class="field-group">
             <span class="field-label">진척율 (%)</span>
-            <input type="number" class="field-input" min="0" max="100"
-                   value="${pct}"
-                   onchange="updateTaskField('${memberId}','${task.id}','overallProgress',+this.value)">
+            <select class="field-input progress-select"
+                    onchange="updateTaskField('${memberId}','${task.id}','overallProgress',+this.value)">
+              ${[0,25,50,75,100].map(v =>
+                `<option value="${v}"${pct===v?' selected':''}>${v}%</option>`
+              ).join('')}
+            </select>
           </div>
         </div>
       </div>
