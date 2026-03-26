@@ -3033,24 +3033,26 @@ async function exportToExcel() {
 
 async function exportTeamSummary() {
   showToast('팀 보고서 생성 중...');
+  let url;
   try {
     const wb = new ExcelJS.Workbook();
     const sheetName = `${state.meta.month}월${state.meta.week}주차`;
     buildTeamSummarySheet(wb.addWorksheet(sheetName));
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
+    url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `${state.meta.teamName}_주간보고_${state.meta.month}월_${state.meta.week}주차.xlsx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
     showToast('✓ 팀 보고서 내보내기 완료!');
   } catch (err) {
     console.error('Team summary export error:', err);
     showToast('오류: ' + err.message);
+  } finally {
+    if (url) URL.revokeObjectURL(url);
   }
 }
 
@@ -3756,6 +3758,7 @@ function buildTeamSummarySheet(ws) {
       pctCell.value = (t.overallProgress || 0) / 100;
       pctCell.numFmt = '0%';
       pctCell.font = BODY_FONT;
+      pctCell.alignment = WRAP;
       pctCell.border = BORDER_ALL;
       bodyCell(ws.getCell(row, 9), '');
       row++;
