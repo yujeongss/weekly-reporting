@@ -1442,6 +1442,27 @@
     .team-td-pct { text-align: center; white-space: nowrap; }
     .team-td-issue { color: var(--red); font-size: 12px; }
     .issue-cell { background: var(--red-light); }
+    /* Filter bar */
+    .team-filter-bar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+      padding: 10px 14px; background: var(--bg); border: 1px solid var(--border-light);
+      border-radius: 8px; margin-bottom: 10px; font-size: 13px;
+    }
+    .team-filter-group { display: flex; align-items: center; gap: 6px; }
+    .team-filter-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+    .team-filter-members { display: flex; flex-wrap: wrap; gap: 6px; }
+    .team-filter-member-label { display: flex; align-items: center; gap: 3px; cursor: pointer; font-size: 12px; }
+    .team-filter-toggle { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .team-filter-select {
+      font-size: 12px; padding: 3px 6px; border: 1px solid var(--border-light);
+      border-radius: 5px; background: var(--card-bg); color: var(--text);
+    }
+    .team-filter-reset {
+      font-size: 12px; padding: 3px 8px; border: 1px solid var(--border-light);
+      border-radius: 5px; background: var(--card-bg); color: var(--text-muted);
+      cursor: pointer;
+    }
+    .team-filter-reset:hover { background: var(--bg); color: var(--text); }
 
     /* ===== PROGRESS INDICATOR ===== */
     .progress-bar-wrap {
@@ -3635,11 +3656,128 @@ function renderTeamCardView() {
   return `<div class="team-card-grid">${cards}</div>`;
 }
 
+function renderTeamFilterBar() {
+  const memberOptions = state.meta.members.map(m =>
+    `<label class="team-filter-member-label">
+      <input type="checkbox" value="${m.id}"
+        ${_teamFilter.members.length === 0 || _teamFilter.members.includes(m.id) ? 'checked' : ''}
+        onchange="applyTeamFilter('member', this.value, this.checked)">
+      ${esc(m.name)}
+    </label>`
+  ).join('');
+
+  return `<div class="team-filter-bar">
+    <div class="team-filter-group">
+      <span class="team-filter-label">팀원</span>
+      <div class="team-filter-members">${memberOptions}</div>
+    </div>
+    <div class="team-filter-group">
+      <label class="team-filter-toggle">
+        <input type="checkbox" ${_teamFilter.issuesOnly ? 'checked' : ''}
+          onchange="applyTeamFilter('issuesOnly', null, this.checked)">
+        이슈만 보기
+      </label>
+    </div>
+    <div class="team-filter-group">
+      <span class="team-filter-label">진척율</span>
+      <select class="team-filter-select" onchange="applyTeamFilter('progressRange', this.value)">
+        <option value="all" ${_teamFilter.progressRange==='all'?'selected':''}>전체</option>
+        <option value="low" ${_teamFilter.progressRange==='low'?'selected':''}>0–30%</option>
+        <option value="mid" ${_teamFilter.progressRange==='mid'?'selected':''}>30–70%</option>
+        <option value="high" ${_teamFilter.progressRange==='high'?'selected':''}>70–100%</option>
+      </select>
+    </div>
+    <div class="team-filter-group">
+      <span class="team-filter-label">정렬</span>
+      <select class="team-filter-select" onchange="applyTeamFilter('sort', this.value)">
+        <option value="default" ${_teamFilter.sort==='default'?'selected':''}>기본</option>
+        <option value="pct_asc" ${_teamFilter.sort==='pct_asc'?'selected':''}>진척율 ↑</option>
+        <option value="pct_desc" ${_teamFilter.sort==='pct_desc'?'selected':''}>진척율 ↓</option>
+        <option value="deadline_asc" ${_teamFilter.sort==='deadline_asc'?'selected':''}>기한 ↑</option>
+        <option value="deadline_desc" ${_teamFilter.sort==='deadline_desc'?'selected':''}>기한 ↓</option>
+      </select>
+    </div>
+    <button class="team-filter-reset" onclick="resetTeamFilter()">초기화</button>
+  </div>`;
+}
+
+function applyTeamFilter(key, value, checked) {
+  if (key === 'member') {
+    if (!checked && _teamFilter.members.length === 0) {
+      _teamFilter.members = state.meta.members.map(m => m.id);
+    }
+    if (checked) {
+      if (!_teamFilter.members.includes(value)) _teamFilter.members.push(value);
+    } else {
+      _teamFilter.members = _teamFilter.members.filter(id => id !== value);
+    }
+    if (_teamFilter.members.length === state.meta.members.length) {
+      _teamFilter.members = [];
+    }
+  } else if (key === 'issuesOnly') {
+    _teamFilter.issuesOnly = !!checked;
+  } else if (key === 'progressRange') {
+    _teamFilter.progressRange = value;
+  } else if (key === 'sort') {
+    _teamFilter.sort = value;
+  }
+  renderMain();
+}
+
+function resetTeamFilter() {
+  _teamFilter = { members: [], issuesOnly: false, progressRange: 'all', sort: 'default' };
+  renderMain();
+}
+
 function renderTeamTableView() {
+  // 1. 팀원 필터
+  let members = state.meta.members;
+  if (_teamFilter.members.length > 0) {
+    members = members.filter(m => _teamFilter.members.includes(m.id));
+  }
+
+  // 2. 정렬
+  if (_teamFilter.sort === 'pct_asc') {
+    members = [...members].sort((a, b) => (getMemberAvgProgress(a.id) || 0) - (getMemberAvgProgress(b.id) || 0));
+  } else if (_teamFilter.sort === 'pct_desc') {
+    members = [...members].sort((a, b) => (getMemberAvgProgress(b.id) || 0) - (getMemberAvgProgress(a.id) || 0));
+  } else if (_teamFilter.sort === 'deadline_asc') {
+    members = [...members].sort((a, b) => {
+      const safeDate = t => t.deadline ? (new Date(t.deadline).getTime() || Infinity) : Infinity;
+      const aMin = Math.min(...(getMemberData(a.id).tasks || []).map(safeDate).concat([Infinity]));
+      const bMin = Math.min(...(getMemberData(b.id).tasks || []).map(safeDate).concat([Infinity]));
+      return aMin - bMin;
+    });
+  } else if (_teamFilter.sort === 'deadline_desc') {
+    members = [...members].sort((a, b) => {
+      const safeDate = t => t.deadline ? (new Date(t.deadline).getTime() || 0) : 0;
+      const aMax = Math.max(...(getMemberData(a.id).tasks || []).map(safeDate).concat([0]));
+      const bMax = Math.max(...(getMemberData(b.id).tasks || []).map(safeDate).concat([0]));
+      return bMax - aMax;
+    });
+  }
+
   const rows = [];
-  for (const m of state.meta.members) {
+  for (const m of members) {
     const data = getMemberData(m.id);
-    const tasks = data.tasks || [];
+    let tasks = data.tasks || [];
+
+    // 3. 이슈만 보기
+    if (_teamFilter.issuesOnly) {
+      tasks = tasks.filter(t => (t.issues || []).some(i => i.text));
+    }
+
+    // 4. 진척율 구간
+    if (_teamFilter.progressRange !== 'all') {
+      tasks = tasks.filter(t => {
+        const p = t.overallProgress || 0;
+        if (_teamFilter.progressRange === 'low')  return p <= 30;
+        if (_teamFilter.progressRange === 'mid')  return p > 30 && p <= 70;
+        if (_teamFilter.progressRange === 'high') return p > 70;
+        return true;
+      });
+    }
+
     if (!tasks.length) {
       rows.push(`<tr class="team-table-row">
         <td class="team-td-member">${esc(m.name)}</td>
@@ -3891,6 +4029,7 @@ function renderFavCards() {
 }
 
 let _teamSummaryCollapsed = false;
+let _teamFilter = { members: [], issuesOnly: false, progressRange: 'all', sort: 'default' };
 function toggleTeamSummary() {
   _teamSummaryCollapsed = !_teamSummaryCollapsed;
   const el = document.querySelector('.team-summary');
@@ -3939,6 +4078,7 @@ function renderTeamView() {
           <button class="team-toggle-btn ${mode === 'card' ? 'active' : ''}" onclick="toggleTeamViewMode('card')">카드</button>
         </div>
       </div>
+      ${mode === 'table' ? renderTeamFilterBar() : ''}
       ${content}
     </div>
     ${renderTeamOperationsSection()}
