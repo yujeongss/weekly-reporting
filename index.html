@@ -314,6 +314,36 @@
 
     .sidebar-spacer { flex: 1; }
 
+    /* 사이드바 접기/펼치기 */
+    #sidebar.collapsed {
+      width: 0;
+      min-width: 0;
+      overflow: hidden;
+      border-right: none;
+    }
+    .sidebar-close-btn {
+      background: none; border: none; font-size: 14px; cursor: pointer;
+      color: rgba(255,255,255,0.7); padding: 2px 4px;
+    }
+    .sidebar-close-btn:hover { color: white; }
+    #sidebarOpenBtn {
+      display: none;
+      position: fixed; top: 12px; left: 12px; z-index: 100;
+      background: var(--primary); color: white; border: none;
+      border-radius: 6px; padding: 6px 10px; font-size: 16px;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    /* 통합 테이블 반응형 */
+    .team-table-wrap { overflow-x: auto; }
+    .team-table { min-width: 600px; }
+
+    /* 768px 미만 자동 숨김 */
+    @media (max-width: 768px) {
+      #sidebar { width: 0; min-width: 0; overflow: hidden; border-right: none; }
+      #sidebarOpenBtn { display: block; }
+    }
+
     .sidebar-footer {
       padding: 12px;
       border-top: 1px solid var(--border-light);
@@ -1956,6 +1986,7 @@
         <div class="sidebar-sub-label">주간업무보고</div>
       </div>
     </div>
+    <button id="sidebarCloseBtn" class="sidebar-close-btn" onclick="toggleSidebar()" title="사이드바 접기">✕</button>
     <div id="notifBellMount"></div>
   </div>
   <div id="notifPanel" class="notif-panel"></div>
@@ -1997,6 +2028,7 @@
 
 <!-- ===== MAIN CONTENT ===== -->
 <main id="main">
+  <button id="sidebarOpenBtn" class="sidebar-open-btn" onclick="toggleSidebar()" title="사이드바 열기">☰</button>
   <div id="mainContent"></div>
 </main>
 
@@ -2485,6 +2517,13 @@ function updatePeriod(field, value) {
   // kept for compatibility but no longer used by HTML
   state.meta[field] = Number(value);
   saveState();
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('collapsed');
+  document.getElementById('sidebarOpenBtn').style.display =
+    sidebar.classList.contains('collapsed') ? 'block' : 'none';
 }
 
 function switchTab(memberId) {
