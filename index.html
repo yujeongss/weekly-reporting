@@ -1256,6 +1256,11 @@
       from { opacity: 0; transform: translateY(12px) scale(0.96); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
+    .toast-action-btn {
+      background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 4px; padding: 2px 8px; font-size: 12px; cursor: pointer; white-space: nowrap;
+    }
+    .toast-action-btn:hover { background: rgba(255,255,255,0.35); }
 
     /* ===== CONTENTEDITABLE PLACEHOLDER ===== */
     [contenteditable]:empty::before {
@@ -2804,13 +2809,49 @@ function addTask(memberId) {
 }
 
 function removeTask(memberId, taskId) {
-  if (!confirm('이 과제를 삭제하시겠습니까?')) return;
   const data = getMemberData(memberId);
-  const taskName = data.tasks.find(t => t.id === taskId)?.kpiProduct || '과제';
-  data.tasks = data.tasks.filter(t => t.id !== taskId);
-  saveState();
-  pushNotification('task_delete', memberId, getMember(memberId)?.name || memberId, taskName);
+  const insertIndex = data.tasks.findIndex(t => t.id === taskId);
+  if (insertIndex === -1) return;
+  const task = data.tasks[insertIndex];
+  const taskName = task.kpiProduct || '과제';
+
+  // 기존 undo 스택이 있으면 즉시 확정
+  if (_undoStack) {
+    clearTimeout(_undoStack.timerId);
+    saveState();
+    pushNotification('task_delete', _undoStack.memberId, getMember(_undoStack.memberId)?.name || _undoStack.memberId, _undoStack.task.kpiProduct || '과제');
+    _undoStack = null;
+  }
+
+  data.tasks.splice(insertIndex, 1);
   renderMain();
+  // pushNotification은 5초 후 삭제 확정 시에만 발생 (되돌리기 시 알림 방지)
+
+  const timerId = setTimeout(() => {
+    _undoStack = null;
+    saveState();
+    pushNotification('task_delete', memberId, getMember(memberId)?.name || memberId, taskName);
+  }, 5000);
+
+  _undoStack = { memberId, task, insertIndex, timerId };
+
+  showToast(`"${taskName}" 삭제됨`, {
+    actionLabel: '되돌리기',
+    action: undoRemoveTask,
+    duration: 5000
+  });
+}
+
+function undoRemoveTask() {
+  if (!_undoStack) return;
+  clearTimeout(_undoStack.timerId);
+  const { memberId, task, insertIndex } = _undoStack;
+  _undoStack = null;
+  const data = getMemberData(memberId);
+  data.tasks.splice(insertIndex, 0, task);
+  saveState();
+  renderMain();
+  showToast('↩ 삭제가 취소되었습니다');
 }
 
 function updateTaskCEField(el) {
@@ -4604,6 +4645,7 @@ function closeNotifPanel() {
 // TOAST
 // ============================================================
 let _toastTimer = null;
+let _undoStack = null; // { memberId, task, insertIndex, timerId }
 // ============================================================
 // LANDING PAGE
 // ============================================================
@@ -4701,16 +4743,29 @@ function showTaskPopup(title, sub) {
   setTimeout(() => el.remove(), 3200);
 }
 
-function showToast(msg) {
+function showToast(msg, opts) {
   const existing = document.querySelector('.toast');
   if (existing) existing.remove();
   clearTimeout(_toastTimer);
-
   const el = document.createElement('div');
   el.className = 'toast';
-  el.textContent = msg;
+  if (opts && opts.actionLabel) {
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.gap = '10px';
+    const span = document.createElement('span');
+    span.textContent = msg;
+    const btn = document.createElement('button');
+    btn.className = 'toast-action-btn';
+    btn.textContent = opts.actionLabel;
+    btn.onclick = () => { clearTimeout(_toastTimer); el.remove(); opts.action(); };
+    el.appendChild(span);
+    el.appendChild(btn);
+  } else {
+    el.textContent = msg;
+  }
   document.body.appendChild(el);
-  _toastTimer = setTimeout(() => el.remove(), 2800);
+  _toastTimer = setTimeout(() => el.remove(), (opts && opts.duration) || 2800);
 }
 
 // ============================================================
