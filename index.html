@@ -3089,7 +3089,7 @@ function renderSearchResults(matches) {
   if (!matches.length) return '<div class="search-no-results">검색 결과 없음</div>';
   return `<div class="search-results">
     ${matches.map(m =>
-      `<div class="search-result-item" onclick="switchTab('${m.memberId}');clearSearch();requestAnimationFrame(()=>{document.querySelector('.task-card[data-task-id=\\'${m.taskId}\\']')?.classList.add('search-highlight');})">
+      `<div class="search-result-item" onclick="switchTab('${m.memberId}');clearSearch();requestAnimationFrame(()=>{const el=document.querySelector('.task-card[data-task-id=\"'+CSS.escape('${m.taskId}')+'\"');if(el){el.classList.add('search-highlight');setTimeout(()=>el.classList.remove('search-highlight'),1500);}})">
         <span class="search-result-member">${esc(m.memberName)}</span>
         <span class="search-result-task">${esc(m.kpiProduct)}</span>
       </div>`
