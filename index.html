@@ -1440,6 +1440,9 @@
     .team-td-kpi:focus { background: var(--accent-light); border-radius: var(--radius-sm); }
     .team-td-activity { min-width: 160px; color: var(--text-secondary); font-size: 12px; }
     .team-td-pct { text-align: center; white-space: nowrap; }
+    .pct-delta { font-size: 10px; margin-left: 4px; font-weight: 600; }
+    .pct-delta.up { color: #16A34A; }
+    .pct-delta.down { color: #DC2626; }
     .team-td-issue { color: var(--red); font-size: 12px; }
     .issue-cell { background: var(--red-light); }
     /* Filter bar */
@@ -1997,6 +2000,7 @@
 // CONSTANTS
 // ============================================================
 const STORAGE_KEY = 'weekly_report_data_v7';
+const SNAPSHOT_KEY = 'weekly_report_snapshots';
 const LAST_VISIT_KEY = 'weekly_report_last_visit';
 const LANDING_TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3시간
 
@@ -2213,6 +2217,36 @@ function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
 }
 
+function saveSnapshot() {
+  const { year, month, week } = state.meta;
+  const weekKey = `${year}-${month}-${week}`;
+  let snaps = loadSnapshots();
+  snaps = snaps.filter(s => s.weekKey !== weekKey);
+  snaps.push({ weekKey, timestamp: Date.now(), members: JSON.parse(JSON.stringify(state.members)) });
+  snaps.sort((a, b) => b.timestamp - a.timestamp);
+  snaps = snaps.slice(0, 8);
+  try { localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snaps)); } catch(e) {}
+}
+
+function loadSnapshots() {
+  try {
+    const raw = localStorage.getItem(SNAPSHOT_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function getPrevProgress(memberId, taskId) {
+  const snaps = loadSnapshots();
+  if (!snaps.length) return null;
+  const { year, month, week } = state.meta;
+  const curKey = `${year}-${month}-${week}`;
+  const prev = snaps.filter(s => s.weekKey !== curKey)[0];
+  if (!prev) return null;
+  const tasks = (prev.members[memberId] || {}).tasks || [];
+  const t = tasks.find(t => t.id === taskId);
+  return t ? (t.overallProgress || 0) : null;
+}
+
 function setMemberStatus(memberId, status) {
   if (state.members[memberId]) {
     state.members[memberId].status = status;
@@ -2387,6 +2421,7 @@ function applyPeriod() {
   const month = Number(document.getElementById('monthInput').value);
   const week  = Number(document.getElementById('weekInput').value);
   if (year >= 2020 && year <= 2035 && month >= 1 && month <= 12 && week >= 1 && week <= 5) {
+    saveSnapshot(); // 현재 주차 상태를 스냅샷으로 저장 (state 변경 전)
     state.meta.year  = year;
     state.meta.month = month;
     state.meta.week  = week;
@@ -4070,6 +4105,17 @@ function renderTeamTableView() {
         }).join('');
       }
       const issueText = (t.issues || []).filter(i => i.text).map(i => i.text).join('\n');
+      const prevPct = getPrevProgress(m.id, t.id);
+      const curPct = t.overallProgress || 0;
+      const deltaHtml = prevPct !== null
+        ? (() => {
+            const d = curPct - prevPct;
+            if (d === 0) return '';
+            return d > 0
+              ? `<span class="pct-delta up">▲${d}%</span>`
+              : `<span class="pct-delta down">▼${Math.abs(d)}%</span>`;
+          })()
+        : '';
       rows.push(`<tr class="team-table-row${issueText ? ' has-issue' : ''}">
         ${ti === 0 ? `<td class="team-td-member" rowspan="${tasks.length}">${esc(m.name)}</td>` : ''}
         <td class="team-td team-td-kpi" style="display:flex;align-items:center;gap:4px;">
@@ -4083,7 +4129,7 @@ function renderTeamTableView() {
         <td class="team-td team-td-activity">${renderActivityCell(t.currentWeekItems)}</td>
         <td class="team-td team-td-activity">${renderActivityCell(t.nextWeekItems)}</td>
         <td class="team-td team-td-pct" style="font-weight:600;color:var(--primary);">
-          ${t.overallProgress || 0}%
+          ${curPct}%${deltaHtml}
         </td>
         <td class="team-td team-td-issue${issueText ? ' issue-cell' : ''}">${esc(issueText)}</td>
       </tr>`);
