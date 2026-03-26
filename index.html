@@ -2741,6 +2741,14 @@ function renderTaskCard(memberId, task) {
         </div>
         <div class="task-fields">
           <div class="field-group">
+            <span class="field-label">사업부문</span>
+            <select class="field-input" onchange="updateTaskField('${memberId}','${task.id}','division',this.value)">
+              ${['제약','병원','SO/인프라'].map(d =>
+                `<option value="${d}"${(task.division||'')=== d?' selected':''}>${d}</option>`
+              ).join('')}
+            </select>
+          </div>
+          <div class="field-group">
             <span class="field-label">기한</span>
             <input type="date" class="field-input" value="${esc(task.deadline || '')}"
                    onchange="updateTaskField('${memberId}','${task.id}','deadline',this.value)">
@@ -3533,12 +3541,12 @@ function buildMemberSheet(ws, memberId) {
   ws.getColumn(7).width = 34.25;     // G
   ws.getColumn(8).width = 9;         // H spacer
 
-  // ── 포맷 상수 (예시.xlsx 추출값) ──
-  const HDR_FILL   = { type: 'pattern', pattern: 'solid', fgColor: { theme: 0, tint: -0.1499984740745262 }, bgColor: { indexed: 64 } };
+  // ── 포맷 상수 ──
+  const HDR_FILL   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' }, bgColor: { indexed: 64 } };
   const GRAY_FILL  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' }, bgColor: { indexed: 64 } };
   const WHITE_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' }, bgColor: { indexed: 64 } };
-  const HDR_FONT   = { size: 10, name: 'GC120', color: { theme: 1 } };
-  const DATA_FONT  = { size: 10, name: 'GC120', color: { theme: 1 } };
+  const HDR_FONT   = { size: 12, name: '맑은 고딕', bold: true };
+  const DATA_FONT  = { size: 12, name: '맑은 고딕' };
   const T = { style: 'thin', color: { indexed: 64 } }; // thin border
 
   const FULL = { top: T, bottom: T, left: T, right: T };
@@ -3833,11 +3841,11 @@ function buildTeamSheet(ws) {
   ws.getColumn(7).width = 34.25;
   ws.getColumn(8).width = 9;
 
-  const HDR_FILL   = { type: 'pattern', pattern: 'solid', fgColor: { theme: 0, tint: -0.1499984740745262 }, bgColor: { indexed: 64 } };
+  const HDR_FILL   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' }, bgColor: { indexed: 64 } };
   const GRAY_FILL  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' }, bgColor: { indexed: 64 } };
   const WHITE_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' }, bgColor: { indexed: 64 } };
-  const HDR_FONT   = { size: 10, name: 'GC120', color: { theme: 1 } };
-  const DATA_FONT  = { size: 10, name: 'GC120', color: { theme: 1 } };
+  const HDR_FONT   = { size: 12, name: '맑은 고딕', bold: true };
+  const DATA_FONT  = { size: 12, name: '맑은 고딕' };
   const T = { style: 'thin', color: { indexed: 64 } };
   const FULL = { top: T, bottom: T, left: T, right: T };
 
@@ -4065,50 +4073,67 @@ function buildTeamSheet(ws) {
 }
 
 function buildTeamSummarySheet(ws) {
-  // 컬럼 너비
-  ws.getColumn(1).width = 3;   // A spacer
-  ws.getColumn(2).width = 14;  // B 구분
-  ws.getColumn(3).width = 12;  // C 내용
-  ws.getColumn(4).width = 20;  // D 구분/과제명
-  ws.getColumn(5).width = 28;  // E 주요활동
-  ws.getColumn(6).width = 8;   // F 단계
-  ws.getColumn(7).width = 12;  // G 기한
-  ws.getColumn(8).width = 10;  // H 진척%
-  ws.getColumn(9).width = 16;  // I 비고/일정
+  // 컬럼 너비 — 레퍼런스(팀명_주간보고.xlsx) 기준
+  ws.getColumn(1).width = 3.625;   // A spacer
+  ws.getColumn(2).width = 16.625;  // B 구분 레이블
+  ws.getColumn(3).width = 1.625;   // C 연결
+  ws.getColumn(4).width = 21.125;  // D 과제명
+  ws.getColumn(5).width = 16.25;   // E 주요활동
+  ws.getColumn(6).width = 16.25;   // F
+  ws.getColumn(7).width = 16.25;   // G
+  ws.getColumn(8).width = 16.25;   // H
+  ws.getColumn(9).width = 20.125;  // I 일정
 
-  const HDR_FILL = { type:'pattern', pattern:'solid', fgColor:{argb:'FF334155'} };
-  const HDR_FONT = { size:10, bold:true, color:{argb:'FFFFFFFF'} };
-  const BODY_FONT = { size:10, name:'맑은 고딕' };
-  const WRAP = { wrapText: true, vertical: 'top' };
+  const FONT     = { size:12, name:'맑은 고딕' };
+  const HDR_FONT = { size:12, name:'맑은 고딕' };
+  const WRAP     = { wrapText:true, vertical:'top' };
+  const CENTER   = { horizontal:'center', vertical:'middle' };
   const BORDER_ALL = {
     top:{style:'thin'}, bottom:{style:'thin'},
     left:{style:'thin'}, right:{style:'thin'}
   };
 
   function hdrCell(cell, val) {
-    cell.value = val; cell.fill = HDR_FILL; cell.font = HDR_FONT;
-    cell.alignment = { horizontal:'center', vertical:'middle' };
+    cell.value = val;
+    cell.font = HDR_FONT;
+    cell.alignment = CENTER;
     cell.border = BORDER_ALL;
   }
   function bodyCell(cell, val) {
-    cell.value = val; cell.font = BODY_FONT;
-    cell.alignment = WRAP; cell.border = BORDER_ALL;
+    cell.value = val;
+    cell.font = FONT;
+    cell.alignment = { ...WRAP, horizontal:'left' };
+    cell.border = BORDER_ALL;
   }
   function sectionLabel(row, label) {
     const c = ws.getCell(row, 2);
     c.value = label;
-    c.font = { size:10, bold:true };
-    c.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE2E8F0'} };
+    c.font = { size:12, bold:true, name:'맑은 고딕' };
+    c.alignment = CENTER;
     c.border = BORDER_ALL;
   }
 
-  // Row 1: 헤더
-  ws.getCell(1,2).value = `${state.meta.month}월 ${state.meta.week}주차`;
-  ws.getCell(1,4).value = `${state.meta.teamName} 주간 업무 보고`;
-  ws.getCell(1,4).font = { size:13, bold:true };
+  // Row 1: 제목
+  ws.getRow(1).height = 30;
+  const weekCell = ws.getCell(1, 2);
+  weekCell.value = `${state.meta.month}월 ${state.meta.week}주차`;
+  weekCell.font  = { size:20, name:'맑은 고딕', color:{argb:'FF0000FF'} };
+  weekCell.alignment = CENTER;
+  weekCell.border = BORDER_ALL;
+
+  const titleCell = ws.getCell(1, 4);
+  titleCell.value = `${state.meta.teamName} 주간 업무 보고`;
+  titleCell.font  = { size:24, bold:true, name:'맑은 고딕' };
+  titleCell.alignment = { horizontal:'left', vertical:'middle' };
 
   // Row 4: 구분/내용 헤더
-  ws.getCell(4,2).value = '구분'; ws.getCell(4,3).value = '내용';
+  ws.getRow(4).height = 25;
+  const r4b = ws.getCell(4, 2);
+  r4b.value = '구분'; r4b.font = { size:13, bold:true, name:'맑은 고딕' };
+  r4b.alignment = CENTER; r4b.border = BORDER_ALL;
+  const r4c = ws.getCell(4, 3);
+  r4c.value = '내용'; r4c.font = { size:13, bold:true, name:'맑은 고딕' };
+  r4c.alignment = CENTER; r4c.border = BORDER_ALL;
 
   // ── 금주실적 ──
   let row = 6;
