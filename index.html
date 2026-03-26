@@ -1363,6 +1363,22 @@
     .team-count-num { font-size: 22px; font-weight: 800; color: var(--text); }
     .team-count-card.warn .team-count-num { color: var(--red); }
     .team-count-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .team-stat-bar {
+      display: flex; align-items: center; gap: 0;
+      background: var(--card-bg); border: 1px solid var(--border-light);
+      border-radius: 10px; padding: 10px 20px; margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .team-stat-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 2px; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .team-stat-item:hover { background: var(--bg); }
+    .team-stat-item.warn .team-stat-num { color: #DC2626; }
+    .team-stat-label { font-size: 11px; color: var(--text-muted); }
+    .team-stat-num { font-size: 18px; font-weight: 700; color: var(--primary); }
+    .team-stat-sep { width: 1px; height: 32px; background: var(--border-light); flex-shrink: 0; }
     /* Card view */
     .team-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 20px; }
     .team-card {
@@ -3513,13 +3529,43 @@ function getMemberAvgProgress(memberId) {
 
 function getTeamCounts() {
   let totalTasks = 0, issueTasks = 0, totalDeploys = 0;
+  let progressSum = 0, progressCount = 0;
   for (const m of state.meta.members) {
     const d = getMemberData(m.id);
-    totalTasks  += (d.tasks || []).length;
-    issueTasks  += (d.tasks || []).filter(t => (t.issues || []).some(i => i.text)).length;
+    const tasks = d.tasks || [];
+    totalTasks   += tasks.length;
+    issueTasks   += tasks.filter(t => (t.issues || []).some(i => i.text)).length;
     totalDeploys += (d.deployments || []).length;
+    tasks.forEach(t => { progressSum += (t.overallProgress || 0); progressCount++; });
   }
-  return { totalTasks, issueTasks, totalDeploys };
+  const avgProgress = progressCount > 0 ? Math.round(progressSum / progressCount) : null;
+  return { totalTasks, issueTasks, totalDeploys, avgProgress };
+}
+
+function renderTeamStatBar() {
+  const { totalTasks, issueTasks, totalDeploys, avgProgress } = getTeamCounts();
+  const avgText = avgProgress !== null ? avgProgress + '%' : '—';
+  return `<div class="team-stat-bar">
+    <div class="team-stat-item" onclick="document.getElementById('team-summary-section')?.scrollIntoView({behavior:'smooth'})">
+      <span class="team-stat-label">전체 과제</span>
+      <span class="team-stat-num">${totalTasks}</span>
+    </div>
+    <div class="team-stat-sep"></div>
+    <div class="team-stat-item" onclick="document.getElementById('team-summary-section')?.scrollIntoView({behavior:'smooth'})">
+      <span class="team-stat-label">평균 진척율</span>
+      <span class="team-stat-num">${avgText}</span>
+    </div>
+    <div class="team-stat-sep"></div>
+    <div class="team-stat-item${issueTasks > 0 ? ' warn' : ''}" onclick="document.getElementById('team-table-section')?.scrollIntoView({behavior:'smooth'})">
+      <span class="team-stat-label">이슈</span>
+      <span class="team-stat-num">${issueTasks}건</span>
+    </div>
+    <div class="team-stat-sep"></div>
+    <div class="team-stat-item" onclick="document.getElementById('team-deploy-section')?.scrollIntoView({behavior:'smooth'})">
+      <span class="team-stat-label">이번 주 배포</span>
+      <span class="team-stat-num">${totalDeploys}건</span>
+    </div>
+  </div>`;
 }
 
 function renderTeamSummaryMetrics() {
@@ -3669,7 +3715,7 @@ function renderTeamDeploySection() {
     });
   }
   if (!rows.length) return '';
-  return `<div class="section" style="margin-top:20px;">
+  return `<div id="team-deploy-section" class="section" style="margin-top:20px;">
     <div class="section-header">
       <span class="section-title">제품 배포</span>
     </div>
@@ -3874,18 +3920,18 @@ function renderTeamView() {
         <!--<button class="status-btn status-done-btn" onclick="collectTeam()">취합하기</button>-->
       </div>
     </div>
-    <div class="team-summary${_teamSummaryCollapsed ? ' collapsed' : ''}">
+    ${renderTeamStatBar()}
+    <div id="team-summary-section" class="team-summary${_teamSummaryCollapsed ? ' collapsed' : ''}">
       <div class="team-summary-header" onclick="toggleTeamSummary()">
         <span class="team-summary-title">진척 현황</span>
         <svg class="team-summary-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="team-summary-body">
         ${renderTeamSummaryMetrics()}
-        ${renderTeamCountCards()}
       </div>
     </div>
     ${renderFavCards()}
-    <div class="section">
+    <div id="team-table-section" class="section">
       <div class="section-header">
         <span class="section-title">팀원 현황</span>
         <div class="team-view-toggle">
