@@ -638,6 +638,37 @@
       gap: 5px;
     }
     .member-reset-btn:hover { background: var(--red-light); color: var(--red); border-color: #FCA5A5; }
+
+    /* ===== SEARCH ===== */
+    .search-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px; background: var(--card-bg);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .search-input {
+      flex: 1; border: 1px solid var(--border-light); border-radius: 6px;
+      padding: 6px 10px; font-size: 13px; background: var(--bg);
+      color: var(--text);
+    }
+    .search-clear-btn {
+      background: none; border: none; font-size: 14px; cursor: pointer; color: var(--text-muted);
+    }
+    .search-results {
+      background: var(--card-bg); border: 1px solid var(--border-light);
+      border-radius: 8px; margin: 8px 16px; overflow: hidden;
+    }
+    .search-result-item {
+      display: flex; gap: 10px; padding: 8px 12px; cursor: pointer;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover { background: var(--bg); }
+    .search-result-member { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+    .search-result-task { font-size: 13px; color: var(--text); }
+    .search-no-results { padding: 12px 16px; font-size: 13px; color: var(--text-muted); }
+    .search-icon-btn { background: none; border: none; font-size: 16px; cursor: pointer; }
+    .task-card.search-highlight { outline: 2px solid #FCD34D; outline-offset: 2px; }
+
     .team-done-count {
       font-size: 13px;
       color: var(--text-secondary);
@@ -2537,8 +2568,19 @@ function switchTab(memberId) {
 // MAIN RENDER
 // ============================================================
 function renderMain() {
+  const searchBarHtml = _searchOpen ? `
+  <div class="search-bar">
+    <input id="searchInput" type="text" class="search-input" placeholder="과제명, 금주활동, 차주계획 검색..."
+           value="${esc(_searchQuery)}"
+           oninput="doSearch(this.value)"
+           onkeydown="if(event.key==='Escape')clearSearch()">
+    <button class="search-clear-btn" onclick="clearSearch()">✕</button>
+  </div>
+  ${_searchQuery ? renderSearchResults(getSearchMatches()) : ''}
+` : '';
+
   if (state.activeTab === '__team__') {
-    document.getElementById('mainContent').innerHTML = renderTeamView();
+    document.getElementById('mainContent').innerHTML = searchBarHtml + renderTeamView();
     return;
   }
   const memberId = state.activeTab;
@@ -2547,7 +2589,7 @@ function renderMain() {
 
   const mdata = state.members[memberId] || {};
   const isEditing = mdata.status === 'editing';
-  document.getElementById('mainContent').innerHTML = `
+  document.getElementById('mainContent').innerHTML = searchBarHtml + `
     <div class="member-header">
       <h1>${esc(member.name)}</h1>
       <span class="period-tag">· ${periodText()} 주간보고</span>
@@ -2560,6 +2602,7 @@ function renderMain() {
           ? `<button class="status-btn status-done-btn" onclick="setMemberStatus('${memberId}','done')">작성완료</button>`
           : `${mdata.updatedAt ? '<span class="status-done-label"><span class="status-check-icon">✓</span> 작성완료</span>' : ''}<button class="status-btn status-edit-btn" onclick="setMemberStatus('${memberId}','editing')">수정하기</button>`
         }
+        <button class="search-icon-btn" onclick="toggleSearch()" title="검색">🔍</button>
       </div>
     </div>
     <div class="content-body${isEditing ? '' : ' content-locked'}">
@@ -3003,6 +3046,55 @@ function dragTaskDrop(memberId, taskId, event) {
 
 function dragTaskEnd() {
   _dragSrc = null;
+}
+
+function toggleSearch() {
+  _searchOpen = !_searchOpen;
+  if (!_searchOpen) { _searchQuery = ''; }
+  renderMain();
+  if (_searchOpen) {
+    requestAnimationFrame(() => document.getElementById('searchInput')?.focus());
+  }
+}
+
+function doSearch(query) {
+  _searchQuery = query.trim();
+  renderMain();
+}
+
+function clearSearch() {
+  _searchQuery = '';
+  _searchOpen = false;
+  renderMain();
+}
+
+function getSearchMatches() {
+  if (!_searchQuery) return [];
+  const q = _searchQuery.toLowerCase();
+  const matches = [];
+  for (const m of state.meta.members) {
+    for (const t of (getMemberData(m.id).tasks || [])) {
+      const inKpi = (t.kpiProduct || '').toLowerCase().includes(q);
+      const inCurrent = (t.currentWeekItems || []).some(i => i.text.toLowerCase().includes(q));
+      const inNext = (t.nextWeekItems || []).some(i => i.text.toLowerCase().includes(q));
+      if (inKpi || inCurrent || inNext) {
+        matches.push({ memberId: m.id, memberName: m.name, taskId: t.id, kpiProduct: t.kpiProduct || '' });
+      }
+    }
+  }
+  return matches;
+}
+
+function renderSearchResults(matches) {
+  if (!matches.length) return '<div class="search-no-results">검색 결과 없음</div>';
+  return `<div class="search-results">
+    ${matches.map(m =>
+      `<div class="search-result-item" onclick="switchTab('${m.memberId}');clearSearch();requestAnimationFrame(()=>{document.querySelector('.task-card[data-task-id=\\'${m.taskId}\\']')?.classList.add('search-highlight');})">
+        <span class="search-result-member">${esc(m.memberName)}</span>
+        <span class="search-result-task">${esc(m.kpiProduct)}</span>
+      </div>`
+    ).join('')}
+  </div>`;
 }
 
 function updateTaskCEField(el) {
@@ -4623,6 +4715,7 @@ function renderTeamView() {
         <!--<span class="team-done-count${allDone ? ' all-done' : ''}">${doneCount}/${total} 완료</span>-->
         <!--<button class="status-btn status-done-btn" onclick="collectTeam()">취합하기</button>-->
         <button class="status-btn team-summary-export-btn" onclick="exportTeamSummary()">📊 팀 보고서 내보내기</button>
+        <button class="search-icon-btn" onclick="toggleSearch()" title="검색">🔍</button>
       </div>
     </div>
     ${renderTeamStatBar()}
@@ -4799,6 +4892,8 @@ let _toastTimer = null;
 let _undoStack = null; // { memberId, task, insertIndex, timerId }
 let _clipboard = null; // deep-cloned task object
 let _dragSrc = null; // { memberId, taskId }
+let _searchQuery = '';
+let _searchOpen = false;
 // ============================================================
 // LANDING PAGE
 // ============================================================
