@@ -3743,7 +3743,7 @@ function renderTeamTableView() {
     members = [...members].sort((a, b) => (getMemberAvgProgress(b.id) || 0) - (getMemberAvgProgress(a.id) || 0));
   } else if (_teamFilter.sort === 'deadline_asc') {
     members = [...members].sort((a, b) => {
-      const safeDate = t => t.deadline ? (new Date(t.deadline).getTime() || Infinity) : Infinity;
+      const safeDate = t => { if (!t.deadline) return Infinity; const ts = new Date(t.deadline).getTime(); return isNaN(ts) ? Infinity : ts; };
       const aMin = Math.min(...(getMemberData(a.id).tasks || []).map(safeDate).concat([Infinity]));
       const bMin = Math.min(...(getMemberData(b.id).tasks || []).map(safeDate).concat([Infinity]));
       return aMin - bMin;
