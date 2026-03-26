@@ -6026,11 +6026,39 @@ function _appendErrorMsg(msg) {
 // ============================================================
 // INIT
 // ============================================================
+function checkWeekChange() {
+  if (!state.meta.teamName) return; // 최초 설치, 팀 이름 없으면 건너뜀
+  const cur = getCurrentWeekOfMonth();
+  const s = state.meta;
+  if (cur.year === s.year && cur.month === s.month && cur.week === s.week) return; // 주차 동일
+  saveSnapshot();
+  const msg = `보고기간이 ${s.month}월 ${s.week}주차에서 ${cur.month}월 ${cur.week}주차로 변경되었습니다.\n차주 계획을 금주 활동으로 이월하시겠습니까?`;
+  if (confirm(msg)) {
+    for (const m of state.meta.members) {
+      const data = getMemberData(m.id);
+      for (const t of (data.tasks || [])) {
+        t.currentWeekItems = (t.nextWeekItems || []).map(i => ({
+          ...i, id: generateId(),
+          details: (i.details || []).map(d => ({ ...d, id: generateId() }))
+        }));
+        t.nextWeekItems = [];
+      }
+    }
+  }
+  state.meta.year  = cur.year;
+  state.meta.month = cur.month;
+  state.meta.week  = cur.week;
+  saveState();
+  renderSidebar();
+  renderMain();
+}
+
 function init() {
   loadState();
   loadNotifications();
   renderSidebar();
   renderMain();
+  setTimeout(checkWeekChange, 200); // DOM 렌더 후 주차 변경 감지
 
   // 초기 로드 시 768px 미만이면 사이드바 자동 접기
   if (window.innerWidth <= 768) {
