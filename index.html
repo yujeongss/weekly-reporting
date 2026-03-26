@@ -2390,6 +2390,18 @@ function applyPeriod() {
     state.meta.year  = year;
     state.meta.month = month;
     state.meta.week  = week;
+    if (confirm('차주 계획을 금주 활동으로 이월하시겠습니까?')) {
+      for (const m of state.meta.members) {
+        const data = getMemberData(m.id);
+        for (const t of (data.tasks || [])) {
+          t.currentWeekItems = (t.nextWeekItems || []).map(i => ({
+            ...i, id: generateId(),
+            details: (i.details || []).map(d => ({ ...d, id: generateId() }))
+          }));
+          t.nextWeekItems = [];
+        }
+      }
+    }
     saveState();
   }
   // Update display
