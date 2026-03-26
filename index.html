@@ -1417,12 +1417,6 @@
     .team-td-kpi:focus { background: var(--accent-light); border-radius: var(--radius-sm); }
     .team-td-activity { min-width: 160px; color: var(--text-secondary); font-size: 12px; }
     .team-td-pct { text-align: center; white-space: nowrap; }
-    .team-pct-input {
-      width: 56px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px;
-      font-size: 13px; text-align: center; font-family: inherit; background: var(--bg); outline: none;
-      transition: all 0.15s;
-    }
-    .team-pct-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
     .team-td-issue { color: var(--red); font-size: 12px; }
     .issue-cell { background: var(--red-light); }
 
@@ -3623,10 +3617,8 @@ function renderTeamTableView() {
         </td>
         <td class="team-td team-td-activity">${renderActivityCell(t.currentWeekItems)}</td>
         <td class="team-td team-td-activity">${renderActivityCell(t.nextWeekItems)}</td>
-        <td class="team-td team-td-pct">
-          <input type="number" class="team-pct-input" min="0" max="100"
-                 value="${t.overallProgress || 0}"
-                 onchange="updateTaskField('${m.id}','${t.id}','overallProgress',+this.value);renderMain();">
+        <td class="team-td team-td-pct" style="font-weight:600;color:var(--primary);">
+          ${t.overallProgress || 0}%
         </td>
         <td class="team-td team-td-issue${issueText ? ' issue-cell' : ''}">${esc(issueText)}</td>
       </tr>`);
