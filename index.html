@@ -1464,6 +1464,40 @@
     }
     .team-filter-reset:hover { background: var(--bg); color: var(--text); }
 
+    /* ===== DEPLOY TIMELINE ===== */
+    .deploy-timeline {
+      margin-top: 16px; padding: 12px 16px;
+      background: var(--bg); border-radius: 8px; border: 1px solid var(--border-light);
+    }
+    .tl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .tl-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .tl-legend { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .tl-leg-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+    .tl-leg-dot.past { background: #9CA3AF; }
+    .tl-leg-dot.future { background: var(--primary); }
+    .tl-track { position: relative; height: 40px; margin-bottom: 20px; overflow: visible; }
+    .tl-line {
+      position: absolute; top: 50%; left: 0; right: 0;
+      height: 2px; background: var(--border-light); transform: translateY(-50%);
+    }
+    .tl-today {
+      position: absolute; top: 50%; width: 2px; height: 16px;
+      background: #EF4444; transform: translate(-50%, -50%);
+    }
+    .tl-dot-wrap { position: absolute; top: 50%; transform: translate(-50%, -50%); }
+    .tl-dot {
+      width: 10px; height: 10px; border-radius: 50%; cursor: pointer;
+      border: 2px solid white; box-shadow: 0 0 0 1px currentColor;
+    }
+    .tl-dot.past { background: #9CA3AF; color: #9CA3AF; }
+    .tl-dot.future { background: var(--primary); color: var(--primary); }
+    .tl-dot-label {
+      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; color: var(--text-muted); white-space: nowrap;
+      max-width: 80px; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tl-axis { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); }
+
     /* ===== PROGRESS INDICATOR ===== */
     .progress-bar-wrap {
       display: none;
@@ -3826,6 +3860,57 @@ function renderTeamTableView() {
   </div>`;
 }
 
+function renderDeployTimeline() {
+  const today = new Date();
+  const year  = today.getFullYear();
+  const month = today.getMonth(); // 0-indexed
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // 이번 달 배포만 수집
+  const items = [];
+  for (const m of state.meta.members) {
+    for (const dep of (getMemberData(m.id).deployments || [])) {
+      if (!dep.deployDate) continue;
+      const d = new Date(dep.deployDate);
+      if (d.getFullYear() !== year || d.getMonth() !== month) continue;
+      items.push({ dep, member: m, day: d.getDate(), isPast: d < today });
+    }
+  }
+
+  if (!items.length) return '';
+
+  const dots = items.map(({ dep, member, day, isPast }) => {
+    const pct = ((day - 0.5) / daysInMonth * 100).toFixed(1);
+    const label = esc(dep.product || '') + ' ' + esc(dep.round || '');
+    const feat = dep.counts ? (dep.counts.feature || 0) : 0;
+    const bug  = dep.counts ? (dep.counts.bug  || 0) : 0;
+    const tooltip = `${esc(member.name)} | ${label} | ${esc(dep.deployDate || '')} | ${feat+bug}건(${feat}/${bug}) | ${esc(dep.progressText || '—')}`;
+    // isPast: 오늘 이전 날짜만 회색 처리 (오늘 배포는 예정=파랑으로 표시)
+    return `<div class="tl-dot-wrap" style="left:${pct}%">
+      <div class="tl-dot${isPast ? ' past' : ' future'}" title="${tooltip}"></div>
+      <div class="tl-dot-label">${label}</div>
+    </div>`;
+  }).join('');
+
+  // 오늘 마커
+  const todayPct = ((today.getDate() - 0.5) / daysInMonth * 100).toFixed(1);
+
+  return `<div class="deploy-timeline">
+    <div class="tl-header">
+      <span class="tl-title">${year}년 ${month + 1}월 배포 일정</span>
+      <span class="tl-legend"><span class="tl-leg-dot past"></span>완료 <span class="tl-leg-dot future"></span>예정</span>
+    </div>
+    <div class="tl-track">
+      <div class="tl-line"></div>
+      <div class="tl-today" style="left:${todayPct}%" title="오늘"></div>
+      ${dots}
+    </div>
+    <div class="tl-axis">
+      <span>1일</span><span>${Math.round(daysInMonth/2)}일</span><span>${daysInMonth}일</span>
+    </div>
+  </div>`;
+}
+
 function renderTeamDeploySection() {
   const rows = [];
   for (const m of state.meta.members) {
@@ -3865,6 +3950,7 @@ function renderTeamDeploySection() {
         <tbody>${rows.join('')}</tbody>
       </table>
     </div>
+    ${renderDeployTimeline()}
   </div>`;
 }
 
