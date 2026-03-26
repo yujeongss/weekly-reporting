@@ -3865,6 +3865,7 @@ function renderDeployTimeline() {
   const year  = today.getFullYear();
   const month = today.getMonth(); // 0-indexed
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
   // 이번 달 배포만 수집
   const items = [];
@@ -3873,7 +3874,7 @@ function renderDeployTimeline() {
       if (!dep.deployDate) continue;
       const d = new Date(dep.deployDate);
       if (d.getFullYear() !== year || d.getMonth() !== month) continue;
-      items.push({ dep, member: m, day: d.getDate(), isPast: d < today });
+      items.push({ dep, member: m, day: d.getDate(), isPast: d < todayMidnight });
     }
   }
 
