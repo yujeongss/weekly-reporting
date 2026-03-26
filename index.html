@@ -1534,27 +1534,84 @@
     .pct-delta.down { color: #DC2626; }
     .team-td-issue { color: var(--red); font-size: 12px; }
     .issue-cell { background: var(--red-light); }
-    /* Filter bar */
+    /* Filter bar — 2026 modern */
     .team-filter-bar {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
-      padding: 10px 14px; background: var(--bg); border: 1px solid var(--border-light);
-      border-radius: 8px; margin-bottom: 10px; font-size: 13px;
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 14px 16px; background: var(--card-bg);
+      border: 1px solid var(--border-light); border-radius: 14px;
+      margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .team-filter-group { display: flex; align-items: center; gap: 6px; }
-    .team-filter-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-    .team-filter-members { display: flex; flex-wrap: wrap; gap: 6px; }
-    .team-filter-member-label { display: flex; align-items: center; gap: 3px; cursor: pointer; font-size: 12px; }
-    .team-filter-toggle { display: flex; align-items: center; gap: 4px; cursor: pointer; }
-    .team-filter-select {
-      font-size: 12px; padding: 3px 6px; border: 1px solid var(--border-light);
-      border-radius: 5px; background: var(--card-bg); color: var(--text);
+    .team-filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .team-filter-divider {
+      width: 1px; height: 20px; background: var(--border-light); margin: 0 2px;
     }
-    .team-filter-reset {
-      font-size: 12px; padding: 3px 8px; border: 1px solid var(--border-light);
-      border-radius: 5px; background: var(--card-bg); color: var(--text-muted);
-      cursor: pointer;
+    .team-filter-label {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
     }
-    .team-filter-reset:hover { background: var(--bg); color: var(--text); }
+    /* Member chips */
+    .tf-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      cursor: pointer; border: 1.5px solid var(--border-light);
+      background: transparent; color: var(--text-secondary);
+      transition: all 0.15s ease; user-select: none;
+    }
+    .tf-chip:hover { border-color: var(--primary); color: var(--primary); background: rgba(99,102,241,0.05); }
+    .tf-chip.active {
+      background: var(--primary); border-color: var(--primary);
+      color: white; box-shadow: 0 2px 6px rgba(99,102,241,0.3);
+    }
+    .tf-chip.active-all {
+      background: var(--text); border-color: var(--text);
+      color: white;
+    }
+    .tf-chip.active-all:hover { opacity: 0.85; }
+    .tf-chip-check { font-size: 10px; }
+    /* Segmented control */
+    .tf-segment {
+      display: inline-flex; background: var(--bg); border: 1px solid var(--border-light);
+      border-radius: 8px; overflow: hidden;
+    }
+    .tf-seg-btn {
+      padding: 4px 10px; font-size: 12px; font-weight: 500; border: none;
+      background: transparent; color: var(--text-muted); cursor: pointer;
+      transition: all 0.15s ease; white-space: nowrap;
+    }
+    .tf-seg-btn:hover { color: var(--text); background: rgba(0,0,0,0.04); }
+    .tf-seg-btn.active {
+      background: var(--primary); color: white; border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(99,102,241,0.25);
+    }
+    /* Issue toggle */
+    .tf-issue-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      cursor: pointer; border: 1.5px solid var(--border-light);
+      background: transparent; color: var(--text-secondary);
+      transition: all 0.15s ease;
+    }
+    .tf-issue-btn.active {
+      background: rgba(220,38,38,0.08); border-color: var(--red);
+      color: var(--red); font-weight: 600;
+    }
+    /* Sort select */
+    .tf-sort-select {
+      font-size: 12px; font-weight: 500; padding: 4px 8px;
+      border: 1.5px solid var(--border-light); border-radius: 8px;
+      background: var(--bg); color: var(--text); cursor: pointer;
+      appearance: none; padding-right: 22px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 7px center;
+    }
+    /* Reset btn */
+    .tf-reset-btn {
+      margin-left: auto; padding: 4px 12px; font-size: 12px; font-weight: 500;
+      border: 1.5px solid var(--border-light); border-radius: 8px;
+      background: transparent; color: var(--text-muted); cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tf-reset-btn:hover { border-color: var(--red); color: var(--red); background: rgba(220,38,38,0.04); }
 
     .progress-select { min-width: 80px; }
 
@@ -4340,52 +4397,55 @@ function renderTeamCardView() {
 }
 
 function renderTeamFilterBar() {
-  const memberOptions = state.meta.members.map(m =>
-    `<label class="team-filter-member-label">
-      <input type="checkbox" value="${m.id}"
-        ${_teamFilter.members.length === 0 || _teamFilter.members.includes(m.id) ? 'checked' : ''}
-        onchange="applyTeamFilter('member', this.value, this.checked)">
-      ${esc(m.name)}
-    </label>`
-  ).join('');
+  const allSelected = _teamFilter.members.length === 0;
+  const memberChips = state.meta.members.map(m => {
+    const active = allSelected || _teamFilter.members.includes(m.id);
+    return `<button class="tf-chip${active ? ' active' : ''}" onclick="applyTeamFilter('member','${m.id}',${!active})">
+      ${active ? '<span class="tf-chip-check">✓</span>' : ''}${esc(m.name)}
+    </button>`;
+  }).join('');
+
+  const allChip = `<button class="tf-chip${allSelected ? ' active-all' : ''}" onclick="applyTeamFilter('all',null,true)">
+    ${allSelected ? '<span class="tf-chip-check">✓</span>' : ''}전체
+  </button>`;
+
+  const seg = (val, label) =>
+    `<button class="tf-seg-btn${_teamFilter.progressRange===val?' active':''}" onclick="applyTeamFilter('progressRange','${val}')">${label}</button>`;
 
   return `<div class="team-filter-bar">
-    <div class="team-filter-group">
+    <div class="team-filter-row">
       <span class="team-filter-label">팀원</span>
-      <div class="team-filter-members">${memberOptions}</div>
+      ${allChip}
+      <div class="team-filter-divider"></div>
+      ${memberChips}
     </div>
-    <div class="team-filter-group">
-      <label class="team-filter-toggle">
-        <input type="checkbox" ${_teamFilter.issuesOnly ? 'checked' : ''}
-          onchange="applyTeamFilter('issuesOnly', null, this.checked)">
-        이슈만 보기
-      </label>
-    </div>
-    <div class="team-filter-group">
+    <div class="team-filter-row">
       <span class="team-filter-label">진척율</span>
-      <select class="team-filter-select" onchange="applyTeamFilter('progressRange', this.value)">
-        <option value="all" ${_teamFilter.progressRange==='all'?'selected':''}>전체</option>
-        <option value="low" ${_teamFilter.progressRange==='low'?'selected':''}>0–30%</option>
-        <option value="mid" ${_teamFilter.progressRange==='mid'?'selected':''}>30–70%</option>
-        <option value="high" ${_teamFilter.progressRange==='high'?'selected':''}>70–100%</option>
-      </select>
-    </div>
-    <div class="team-filter-group">
+      <div class="tf-segment">
+        ${seg('all','전체')}${seg('low','0–30%')}${seg('mid','30–70%')}${seg('high','70–100%')}
+      </div>
+      <div class="team-filter-divider"></div>
+      <button class="tf-issue-btn${_teamFilter.issuesOnly?' active':''}" onclick="applyTeamFilter('issuesOnly',null,${!_teamFilter.issuesOnly})">
+        ⚠ 이슈만
+      </button>
+      <div class="team-filter-divider"></div>
       <span class="team-filter-label">정렬</span>
-      <select class="team-filter-select" onchange="applyTeamFilter('sort', this.value)">
-        <option value="default" ${_teamFilter.sort==='default'?'selected':''}>기본</option>
+      <select class="tf-sort-select" onchange="applyTeamFilter('sort',this.value)">
+        <option value="default" ${_teamFilter.sort==='default'?'selected':''}>기본순</option>
         <option value="pct_asc" ${_teamFilter.sort==='pct_asc'?'selected':''}>진척율 ↑</option>
         <option value="pct_desc" ${_teamFilter.sort==='pct_desc'?'selected':''}>진척율 ↓</option>
         <option value="deadline_asc" ${_teamFilter.sort==='deadline_asc'?'selected':''}>기한 ↑</option>
         <option value="deadline_desc" ${_teamFilter.sort==='deadline_desc'?'selected':''}>기한 ↓</option>
       </select>
+      <button class="tf-reset-btn" onclick="resetTeamFilter()">↺ 초기화</button>
     </div>
-    <button class="team-filter-reset" onclick="resetTeamFilter()">초기화</button>
   </div>`;
 }
 
 function applyTeamFilter(key, value, checked) {
-  if (key === 'member') {
+  if (key === 'all') {
+    _teamFilter.members = []; // 전체 선택
+  } else if (key === 'member') {
     if (!checked && _teamFilter.members.length === 0) {
       _teamFilter.members = state.meta.members.map(m => m.id);
     }
