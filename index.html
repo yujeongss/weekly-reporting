@@ -1333,6 +1333,12 @@
       overflow: hidden; transition: max-height 0.26s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease;
       max-height: 0; opacity: 0;
     }
+    .fav-issue-dot {
+      position: absolute; top: 10px; right: 10px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #DC2626;
+    }
+    .fav-card.has-issue-fav { border-top: 2px solid #DC2626; }
     .fav-card-detail.open { max-height: 600px; opacity: 1; }
     .fav-detail-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-light); }
     .fav-detail-label { font-size: 10px; font-weight: 700; color: var(--text-muted);
@@ -1406,7 +1412,8 @@
     }
     .team-table-row { border-bottom: 1px solid var(--border-light); }
     .team-table-row:last-child { border-bottom: none; }
-    .team-table-row.has-issue { background: #FFFBF0; }
+    .team-table-row.has-issue { background: rgba(220,38,38,0.04); border-left: 3px solid #DC2626; }
+    .team-table-row:not(.has-issue) { border-left: 3px solid transparent; }
     .team-td { padding: 10px 14px; vertical-align: top; color: var(--text); line-height: 1.6; white-space: pre-line; }
     .team-td-member {
       font-weight: 700; font-size: 13px; color: var(--text);
@@ -3770,7 +3777,9 @@ function renderFavCards() {
       const mkList = items => items.length
         ? `<ul class="fav-detail-list">${items.map(i => `<li>${esc(i.text)}</li>`).join('')}</ul>`
         : `<span class="fav-detail-empty">없음</span>`;
-      return `<div class="fav-card" data-fav="${k}">
+      const hasIssue = issues.length > 0;
+      return `<div class="fav-card${hasIssue ? ' has-issue-fav' : ''}" data-fav="${k}">
+        ${hasIssue ? '<span class="fav-issue-dot" title="이슈 있음"></span>' : ''}
         <div class="fav-card-header">
           <div class="fav-card-header-left">
             <div class="fav-card-type">KPI / 제품</div>
@@ -3804,7 +3813,9 @@ function renderFavCards() {
       const mkList = items => items.length
         ? `<ul class="fav-detail-list">${items.map(i => `<li>${esc(i.text)}</li>`).join('')}</ul>`
         : `<span class="fav-detail-empty">없음</span>`;
-      return `<div class="fav-card" data-fav="${k}">
+      const hasDeployIssue = !!(dep.issues && dep.issues.trim());
+      return `<div class="fav-card${hasDeployIssue ? ' has-issue-fav' : ''}" data-fav="${k}">
+        ${hasDeployIssue ? '<span class="fav-issue-dot" title="이슈 있음"></span>' : ''}
         <div class="fav-card-header">
           <div class="fav-card-header-left">
             <div class="fav-card-type">제품 배포</div>
