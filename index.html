@@ -2001,10 +2001,10 @@
     }
 
   .onboarding-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 999;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 10001;
   }
   .onboarding-tooltip {
-    position: fixed; z-index: 1000; background: white; border-radius: 10px;
+    position: fixed; z-index: 10002; background: white; border-radius: 10px;
     padding: 16px; max-width: 280px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   }
   .onboarding-step-num { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
@@ -3158,7 +3158,7 @@ function showOnboardingStep() {
   overlay.className = 'onboarding-overlay';
   overlay.innerHTML = `
     <div class="onboarding-backdrop"></div>
-    <div class="onboarding-tooltip" style="top:${rect.bottom + 10}px;left:${Math.max(10, rect.left)}px;">
+    <div class="onboarding-tooltip" style="top:${Math.min(rect.bottom + 10, window.innerHeight - 160)}px;left:${Math.max(10, rect.left)}px;">
       <div class="onboarding-step-num">${_onboardingStep + 1} / ${ONBOARDING_STEPS.length}</div>
       <div class="onboarding-title">${esc(step.title)}</div>
       <div class="onboarding-text">${esc(step.text)}</div>
